@@ -15,7 +15,7 @@ service TrainAdministrator {
 }
 
 message RequestPlatformInfo {
-  Train train = 1;
+  Train inbound_train = 1;
   bool has_double_traction = 2;
 }
 

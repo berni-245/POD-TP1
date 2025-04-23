@@ -23,7 +23,7 @@ message PlatformSize {
 
 message Platform {
   int32 id = 1;
-  PlatformSize trainSize = 2;
+  Size platform_size = 2;
   State state = 3;
-  repeated Train trains = 4;
+  Train trains = 4;
 }
