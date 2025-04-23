@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+ import "google/protobuf/wrappers.proto";
+ import "google/protobuf/empty.proto";
+ import "utils.proto";
+ import "train.proto";
+
+ package service;
+
+ option java_package = "ar.edu.itba.pod.server";
+ option java_outer_classname = "ServiceModel";
+ option java_multiple_files = true;
+
+service PlatformAdministrator {
+  rpc AddPlatform(PlatformSize) returns (Platform);
+  rpc checkState(google.protobuf.Int32Value) returns (Platform);
+  rpc toggleState(google.protobuf.Int32Value) returns (Platform);
+}
+
+message PlatformSize {
+  Size platform_size = 1;
+}
+
+message Platform {
+  int32 id = 1;
+  PlatformSize trainSize = 2;
+  State state = 3;
+  repeated Train trains = 4;
+}

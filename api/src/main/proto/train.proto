@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+import "google/protobuf/wrappers.proto";
+import "google/protobuf/empty.proto";
+import "utils.proto";
+
+package service;
+
+option java_package = "ar.edu.itba.pod.server";
+option java_outer_classname = "ServiceModel";
+option java_multiple_files = true;
+
+service TrainAdministrator {
+  rpc RequestPlatform(RequestPlatformInfo) returns (TrainResponseData);
+}
+
+message RequestPlatformInfo {
+  Train train = 1;
+  bool has_double_traction = 2;
+}
+
+message TrainResponseData {
+  Train train = 1;
+  bool has_double_traction = 2;
+  State state = 3;
+  int32 trains_ahead = 4;
+}
+
+message Train {
+  int32 id = 1;
+  Size train_size = 2;
+  int32 occupancy_number = 3;
+}
+
+message TrainSize {
+  Size train_size = 1;
+}
