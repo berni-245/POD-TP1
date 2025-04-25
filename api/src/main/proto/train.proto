@@ -3,6 +3,7 @@ syntax = "proto3";
 import "google/protobuf/wrappers.proto";
 import "google/protobuf/empty.proto";
 import "utils.proto";
+import "platform.proto";
 
 package service;
 
@@ -11,27 +12,30 @@ option java_outer_classname = "ServiceModel";
 option java_multiple_files = true;
 
 service TrainAdministrator {
-  rpc RequestPlatform(RequestPlatformInfo) returns (TrainResponseData);
+  rpc RequestPlatform(TrainValue) returns (TrainResponseData);
+  rpc OccupyPlatform(TrainAndPlatformValue) returns (TrainResponseData);
+  rpc LeavePlatform(TrainAndPlatformValue) returns (TrainResponseData);
 }
 
-message RequestPlatformInfo {
-  Train inbound_train = 1;
-  bool has_double_traction = 2;
+message TrainValue {
+  Train train = 1;
+}
+
+message TrainAndPlatformValue {
+  Train train = 1;
+  Platform platform = 2;
 }
 
 message TrainResponseData {
   Train train = 1;
-  bool has_double_traction = 2;
-  State state = 3;
-  int32 trains_ahead = 4;
+  Platform platform = 2;
+  int32 trains_ahead = 3;
 }
 
 message Train {
   int32 id = 1;
   Size train_size = 2;
   int32 occupancy_number = 3;
-}
-
-message TrainSize {
-  Size train_size = 1;
+  bool has_double_traction = 4;
+  TrainState train_state = 5;
 }

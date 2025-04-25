@@ -4,13 +4,23 @@ import "google/protobuf/wrappers.proto";
 import "google/protobuf/empty.proto";
 
 enum Size {
-  SMALL = 0;
-  MEDIUM = 1;
-  LARGE = 2;
+  SIZE_UNSPECIFIED = 0;
+  SIZE_SMALL = 1;
+  SIZE_MEDIUM = 2;
+  SIZE_LARGE = 3;
 }
 
-enum State {
-  IDLE = 0;
-  BUSY = 1;
-  CLOSED = 2;
+enum PlatformState {
+  PLATFORM_STATE_UNSPECIFIED = 0;
+  PLATFORM_STATE_IDLE = 1;
+  PLATFORM_STATE_BUSY = 2;
+  PLATFORM_STATE_CLOSED = 3;
+}
+
+enum TrainState {
+  TRAIN_STATE_UNSPECIFIED = 0;
+  TRAIN_STATE_WAITING = 1;
+  TRAIN_STATE_PROCESS = 2;
+  TRAIN_STATE_SPLIT_AND_PROCESS = 3;
+  TRAIN_STATE_IN_PLATFORM = 4;
 }
