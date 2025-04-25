@@ -1,5 +1,7 @@
 package ar.edu.itba.pod.server;
 
+import ar.edu.itba.pod.server.servant.ServantFactory;
+import io.grpc.BindableService;
 import io.grpc.ServerBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,8 +15,10 @@ public class Server {
         logger.info(" Server Starting ...");
 
         int port = 50051;
-        io.grpc.Server server = ServerBuilder.forPort(port)
-                .build();
+        ServerBuilder<?> serverBuilder = ServerBuilder.forPort(port);
+        for (BindableService bs : ServantFactory.getServants())
+            serverBuilder.addService(bs);
+        io.grpc.Server server = serverBuilder.build();
         server.start();
         logger.info("Server started, listening on " + port);
         server.awaitTermination();
