@@ -1,14 +1,11 @@
 syntax = "proto3";
 
-import "google/protobuf/wrappers.proto";
-import "google/protobuf/empty.proto";
-import "utils.proto";
-import "platform.proto";
+import "global.proto";
 
 package service;
 
 option java_package = "ar.edu.itba.pod.server";
-option java_outer_classname = "ServiceModel";
+option java_outer_classname = "TrainAdministratorModel";
 option java_multiple_files = true;
 
 service TrainAdministrator {
@@ -30,12 +27,4 @@ message TrainResponseData {
   Train train = 1;
   Platform platform = 2;
   int32 trains_ahead = 3;
-}
-
-message Train {
-  int32 id = 1;
-  Size train_size = 2;
-  int32 occupancy_number = 3;
-  bool has_double_traction = 4;
-  TrainState train_state = 5;
 }

@@ -1,14 +1,12 @@
 syntax = "proto3";
 
  import "google/protobuf/wrappers.proto";
- import "google/protobuf/empty.proto";
- import "utils.proto";
- import "train.proto";
+ import "global.proto";
 
  package service;
 
  option java_package = "ar.edu.itba.pod.server";
- option java_outer_classname = "ServiceModel";
+ option java_outer_classname = "PlatformAdministratorModel";
  option java_multiple_files = true;
 
 service PlatformAdministrator {
@@ -19,11 +17,4 @@ service PlatformAdministrator {
 
 message PlatformSize {
   Size platform_size = 1;
-}
-
-message Platform {
-  int32 id = 1;
-  Size platform_size = 2;
-  State state = 3;
-  Train trains = 4;
 }

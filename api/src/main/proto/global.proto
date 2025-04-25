@@ -1,7 +1,7 @@
 syntax = "proto3";
 
-import "google/protobuf/wrappers.proto";
-import "google/protobuf/empty.proto";
+package service;
+option java_package = "ar.edu.itba.pod.server";
 
 enum Size {
   SIZE_UNSPECIFIED = 0;
@@ -23,4 +23,19 @@ enum TrainState {
   TRAIN_STATE_PROCESS = 2;
   TRAIN_STATE_SPLIT_AND_PROCESS = 3;
   TRAIN_STATE_IN_PLATFORM = 4;
+}
+
+message Train {
+  string id = 1;
+  Size train_size = 2;
+  int32 occupancy_number = 3;
+  bool has_double_traction = 4;
+  TrainState train_state = 5;
+}
+
+message Platform {
+  int32 id = 1;
+  Size platform_size = 2;
+  PlatformState state = 3;
+  Train trains = 4;
 }
