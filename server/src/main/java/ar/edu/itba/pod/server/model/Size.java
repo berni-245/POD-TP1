@@ -12,6 +12,13 @@ public enum Size {
         this.letter = letter;
     }
 
+    public static Size fromOrdinal(int ordinal) {
+        if (ordinal < 0 || ordinal >= values().length) {
+            throw new IllegalArgumentException();
+        }
+        return values()[ordinal];
+    }
+
     @Override
     public String toString() {
         return letter;

@@ -5,14 +5,16 @@ import java.util.Objects;
 public class Train {
     private final String id;
     private final Size trainSize;
-    private final boolean doubleTraction;
     private int passengers;
+    private final boolean doubleTraction;
+    private TrainState trainState;
 
     public Train(String id, Size trainSize, boolean doubleTraction) {
         this.id = id;
         this.trainSize = trainSize;
         this.doubleTraction = doubleTraction;
         this.passengers = 0;
+        trainState = TrainState.WAITING;
     }
 
     public void boardPassengers(int passengers) {
@@ -23,12 +25,28 @@ public class Train {
         this.passengers = 0;
     }
 
+    public boolean canSplitIntoTwo() {
+        return doubleTraction && trainSize != Size.SMALL;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public Size getTrainSize() {
+        return trainSize;
+    }
+
+    public boolean isDoubleTraction() {
+        return doubleTraction;
+    }
+
     public int getPassengers() {
         return passengers;
     }
 
-    public boolean canSplitIntoTwo() {
-        return doubleTraction && trainSize != Size.SMALL;
+    public TrainState getTrainState() {
+        return trainState;
     }
 
     @Override
