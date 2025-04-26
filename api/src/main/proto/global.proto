@@ -20,8 +20,8 @@ enum PlatformState {
 enum TrainState {
   TRAIN_STATE_UNSPECIFIED = 0;
   TRAIN_STATE_WAITING = 1;
-  TRAIN_STATE_PROCESS = 2;
-  TRAIN_STATE_SPLIT_AND_PROCESS = 3;
+  TRAIN_STATE_PROCEED = 2;
+  TRAIN_STATE_SPLIT_AND_PROCEED = 3;
   TRAIN_STATE_IN_PLATFORM = 4;
 }
 
@@ -37,5 +37,5 @@ message Platform {
   int32 id = 1;
   Size platform_size = 2;
   PlatformState state = 3;
-  Train trains = 4;
+  Train train = 4;
 }
