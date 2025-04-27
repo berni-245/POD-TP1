@@ -2,13 +2,22 @@ package ar.edu.itba.pod.server.model;
 
 import ar.edu.itba.pod.server.exception.PlatformNotFoundException;
 
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentMap;
 
 public class Station {
     private final ConcurrentLinkedQueue<Train> waitingTrains = new ConcurrentLinkedQueue<>();
-    private final ConcurrentHashMap<Integer, Platform> platforms = new ConcurrentHashMap<>();
+    private final Map<Size, ConcurrentLinkedQueue<Platform>> freePlatforms;
+    private final ConcurrentMap<Integer, Platform> platforms = new ConcurrentHashMap<>();
+
+    public Station() {
+        this.freePlatforms = new HashMap<>();
+        for(Size size : Size.values())
+            freePlatforms.put(size, new ConcurrentLinkedQueue<>());
+    }
 
     public Platform addPlatform(Size platformSize) {
         Platform platform = new Platform(platformSize);
@@ -24,7 +33,7 @@ public class Station {
         return platform;
     }
 
-    public Platform togglePlatform(int id) {
+    public synchronized Platform togglePlatform(int id) {
         Platform platform = getPlatform(id);
         platform.toggleState();
         return platform;

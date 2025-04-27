@@ -16,16 +16,16 @@ public class TrainAdministratorServant extends TrainAdministratorGrpc.TrainAdmin
 
     @Override
     public void requestPlatform(TrainValue request, StreamObserver<TrainResponseData> responseObserver) {
-        super.requestPlatform(request, responseObserver);
+        System.out.println("TODO");
     }
 
     @Override
     public void occupyPlatform(TrainAndPlatformValue request, StreamObserver<TrainResponseData> responseObserver) {
-        super.occupyPlatform(request, responseObserver);
+        System.out.println("TODO");
     }
 
     @Override
     public void leavePlatform(TrainAndPlatformValue request, StreamObserver<TrainResponseData> responseObserver) {
-        super.leavePlatform(request, responseObserver);
+        System.out.println("TODO");
     }
 }
