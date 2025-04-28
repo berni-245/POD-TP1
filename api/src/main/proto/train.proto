@@ -26,5 +26,6 @@ message TrainAndPlatformValue {
 message TrainResponseData {
   Train train = 1;
   Platform platform = 2;
-  int32 trains_ahead = 3;
+  Platform secondPlatform = 3;
+  int32 trains_ahead = 4;
 }

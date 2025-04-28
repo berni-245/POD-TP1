@@ -1,3 +1,4 @@
+/*
 package ar.edu.itba.pod.server;
 
 import ar.edu.itba.pod.server.exception.IllegalPlatformToggleStateException;
@@ -65,4 +66,4 @@ public class GlobalExceptionHandlerInterceptor implements ServerInterceptor {
         }
     }
 
-}
+}*/

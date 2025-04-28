@@ -3,6 +3,7 @@ package ar.edu.itba.pod.server;
 import ar.edu.itba.pod.server.servant.ServantFactory;
 import io.grpc.BindableService;
 import io.grpc.ServerBuilder;
+import io.grpc.ServerInterceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,6 +19,7 @@ public class Server {
         ServerBuilder<?> serverBuilder = ServerBuilder.forPort(port);
         for (BindableService bs : ServantFactory.getServants())
             serverBuilder.addService(bs);
+//        serverBuilder.intercept(new GlobalExceptionHandlerInterceptor());
         io.grpc.Server server = serverBuilder.build();
         server.start();
         logger.info("Server started, listening on " + port);
