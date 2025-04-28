@@ -8,6 +8,8 @@ public class Train {
     private int passengers;
     private final boolean doubleTraction;
     private TrainState trainState;
+    private Platform platform;
+    private Platform secondPlatform;
 
     public Train(String id, Size trainSize, boolean doubleTraction) {
         this.id = id;
@@ -23,6 +25,18 @@ public class Train {
 
     public void disembarkAllPassengers() {
         this.passengers = 0;
+    }
+
+    public void associatePlatform(Platform platform) {
+        this.platform = platform;
+        trainState = TrainState.PROCEED;
+    }
+
+    public void associateSecondPlatform(Platform secondPlatform) {
+        if (!canSplitIntoTwo())
+            throw new IllegalStateException();
+        this.secondPlatform = secondPlatform;
+        trainState = TrainState.SPLIT_AND_PROCEED;
     }
 
     public boolean canSplitIntoTwo() {
@@ -49,6 +63,14 @@ public class Train {
         return trainState;
     }
 
+    public Platform getPlatform() {
+        return platform;
+    }
+
+    public Platform getSecondPlatform() {
+        return secondPlatform;
+    }
+
     @Override
     public String toString() {
         // \uD83D\uDE85 -> 🚅
@@ -58,6 +80,12 @@ public class Train {
     @Override
     public boolean equals(Object obj) {
         return obj instanceof Train train && id.equals(train.id);
+    }
+
+    public boolean strictEquals(Train train) {
+        return id.equals(train.id)
+                && trainSize.equals(train.trainSize)
+                && doubleTraction == train.doubleTraction;
     }
 
     @Override

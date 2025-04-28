@@ -6,7 +6,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class Platform {
+public class Platform  implements Comparable<Platform> {
     private static final AtomicInteger currentId = new AtomicInteger(1);
     private final int id;
     private final Size platformSize;
@@ -58,6 +58,11 @@ public class Platform {
     @Override
     public int hashCode() {
         return Objects.hash(id);
+    }
+
+    @Override
+    public int compareTo(Platform o) {
+        return Integer.compare(id, o.id);
     }
 
     public int getId() {

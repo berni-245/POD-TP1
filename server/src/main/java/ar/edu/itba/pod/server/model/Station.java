@@ -1,41 +1,107 @@
 package ar.edu.itba.pod.server.model;
 
 import ar.edu.itba.pod.server.exception.PlatformNotFoundException;
+import ar.edu.itba.pod.server.exception.TrainNotFoundException;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ConcurrentMap;
+import java.util.*;
+import java.util.concurrent.*;
 
 public class Station {
     private final ConcurrentLinkedQueue<Train> waitingTrains = new ConcurrentLinkedQueue<>();
-    private final Map<Size, ConcurrentLinkedQueue<Platform>> freePlatforms;
-    private final ConcurrentMap<Integer, Platform> platforms = new ConcurrentHashMap<>();
+    private final Map<Size, SortedMap<Integer, Platform>> platforms;
 
     public Station() {
-        this.freePlatforms = new HashMap<>();
+        this.platforms = new HashMap<>();
         for(Size size : Size.values())
-            freePlatforms.put(size, new ConcurrentLinkedQueue<>());
+            platforms.put(size, new ConcurrentSkipListMap<>()); // these pair of references won't change
+
     }
 
     public Platform addPlatform(Size platformSize) {
         Platform platform = new Platform(platformSize);
-        platforms.put(platform.getId(), platform);
+        platforms.get(platformSize).put(platform.getId(), platform);
         System.out.println(platforms);
         return platform;
     }
 
     public Platform getPlatform(int id) {
-        Platform platform = platforms.get(id);
-        if (platform == null)
-            throw new PlatformNotFoundException();
-        return platform;
+        for (Size size : Size.values()) {
+            Platform platform = platforms.get(size).get(id);
+            if (platform != null)
+                return platform;
+        }
+        throw new PlatformNotFoundException();
     }
 
-    public synchronized Platform togglePlatform(int id) {
+    public Platform togglePlatform(int id) {
         Platform platform = getPlatform(id);
         platform.toggleState();
         return platform;
+    }
+
+    public Train addTrainOrGet(String trainId, Size trainSize, int passengers, boolean doubleTraction) {
+        Train train = new Train(trainId, trainSize, doubleTraction);
+        train.boardPassengers(passengers);
+        if (waitingTrains.contains(train))
+            return getWaitingTrain(trainId, trainSize, passengers, doubleTraction);
+        waitingTrains.add(train);
+        return train;
+    }
+
+    // returns the trains ahead
+    public int updateWaitingTrainState(Train train) {
+        if (waitingTrains.isEmpty())
+            throw new TrainNotFoundException();
+
+        if (!waitingTrains.peek().equals(train)) {
+            int ahead = 0;
+            for (Train t : waitingTrains) {
+                if (t.equals(train)) break;
+                ahead++;
+            } // TODO exception if not in the list
+            return ahead;
+        }
+
+        for (Size size : Size.valuesFromSize(train.getTrainSize())) {
+            for (Platform platform : platforms.get(size).values()) {
+                if (platform.getPlatformState().equals(PlatformState.IDLE)) {
+                    train.associatePlatform(platform);
+                    return 0;
+                }
+            }
+        }
+
+        if (train.canSplitIntoTwo()) {
+            Platform platform1 = null;
+            for (Size size : Size.valuesFromSize(Size.fromOrdinal(train.getTrainSize().ordinal() - 1))) {
+                for (Platform platform : platforms.get(size).values()) {
+                    if (platform.getPlatformState().equals(PlatformState.IDLE)) {
+                        if (platform1 == null) {
+                            platform1 = platform;
+                        }
+                        else {
+                            train.associatePlatform(platform1);
+                            train.associateSecondPlatform(platform);
+                            return 0;
+                        }
+                    }
+                }
+            }
+        }
+        return 0;
+    }
+
+    public Train getWaitingTrain(String id, Size trainSize, int passengers, boolean doubleTraction) {
+        Train train = findTrainByIdOrThrow(id);
+        System.out.println(train);
+        if (!train.strictEquals(new Train(id, trainSize, doubleTraction)) || train.getPassengers() != passengers) {
+            throw new IllegalStateException(); // TODO custom
+        }
+
+        return train;
+    }
+
+    private Train findTrainByIdOrThrow(String id) {
+        return waitingTrains.stream().filter(t -> t.getId().equals(id)).findFirst().orElseThrow(TrainNotFoundException::new);
     }
 }
