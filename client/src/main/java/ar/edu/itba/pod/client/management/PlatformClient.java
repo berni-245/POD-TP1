@@ -1,11 +1,11 @@
 package ar.edu.itba.pod.client.management;
-/*
+
 import ar.edu.itba.pod.server.Global;
 import ar.edu.itba.pod.server.PlatformAdministratorGrpc;
-import ar.edu.itba.pod.server.PlatformSize;*/
-
+import ar.edu.itba.pod.server.PlatformSize;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import io.grpc.StatusRuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,10 +13,10 @@ import java.util.concurrent.TimeUnit;
 
 public class PlatformClient {
 
+    private static final int TIMEOUT = 10;
     private static final Logger logger = LoggerFactory.getLogger(PlatformClient.class);
 
     public static void main(String[] args) throws InterruptedException {
-
         logger.info("Platform Client Starting ...");
 
         final String serverAddress = System.getProperty("serverAddress");
@@ -25,19 +25,60 @@ public class PlatformClient {
         final String platform = System.getProperty("platform");
 
         if (serverAddress == null || action == null) {
-            logger.error("Invalid arguments");
-            // Exception?
+            logger.error("Missing argument (Platform Client)");
             return;
         }
-
         final ManagedChannel channel = ManagedChannelBuilder.forTarget(serverAddress).usePlaintext().build();
 
         try {
-            /*final PlatformAdministratorGrpc.PlatformAdministratorBlockingStub stub = PlatformAdministratorGrpc.newBlockingStub(channel);
-            Global.Platform platform = stub.addPlatform(PlatformSize.newBuilder().setPlatformSize(Global.Size.SIZE_LARGE).build());*/
-        } finally {
-            channel.shutdown().awaitTermination(10, TimeUnit.SECONDS);
-        }
+            final PlatformAdministratorGrpc.PlatformAdministratorBlockingStub stub = PlatformAdministratorGrpc.newBlockingStub(channel);
+            Global.Platform platformReply;
 
+            switch (action) {
+                case "add" -> {
+                    Global.Size protoSize = parseSize(size);
+                    if (protoSize == Global.Size.SIZE_UNSPECIFIED) {
+                        logger.error("Invalid size");
+                        return;
+                    }
+                    platformReply = stub.addPlatform(PlatformSize.newBuilder().setPlatformSize(protoSize).build());
+                    System.out.printf("\uD83D\uDE89 Platform #%d (%s) added", platformReply.getId(), platformReply.getPlatformSize());
+                }
+                case "status" -> {
+                    if (platform == null) {
+                        logger.error("Missing platform");
+                        return;
+                    }
+                    platformReply = stub.checkState(com.google.protobuf.Int32Value.newBuilder().setValue(Integer.parseInt(platform)).build());
+                    System.out.printf("\uD83D\uDE89 Platform #%d (%s) is %s", platformReply.getId(), platformReply.getPlatformSize(), platformReply.getState());
+                }
+                case "toggle" -> {
+                    if (platform == null) {
+                        logger.error("Missing platform");
+                        return;
+                    }
+                    platformReply = stub.toggleState(com.google.protobuf.Int32Value.newBuilder().setValue(Integer.parseInt(platform)).build());
+                    System.out.printf("\uD83D\uDE89 Platform #%d (%s) is %s", platformReply.getId(), platformReply.getPlatformSize(), platformReply.getState());
+                }
+                default -> {
+                    logger.error("Invalid action (Platform Client)");
+                    return;
+                }
+            }
+        }
+        catch (StatusRuntimeException e) {
+            logger.error("RPC failed: {}", e.getStatus(), e);
+        } finally {
+            channel.shutdown().awaitTermination(TIMEOUT, TimeUnit.SECONDS);
+        }
+    }
+
+    private static Global.Size parseSize(String size) {
+        return switch (size) {
+            case "S" -> Global.Size.SIZE_SMALL;
+            case "M" -> Global.Size.SIZE_MEDIUM;
+            case "L" -> Global.Size.SIZE_LARGE;
+            default -> Global.Size.SIZE_UNSPECIFIED;
+        };
     }
 }
