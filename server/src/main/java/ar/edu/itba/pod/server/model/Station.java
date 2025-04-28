@@ -101,7 +101,29 @@ public class Station {
         return train;
     }
 
-    private Train findTrainByIdOrThrow(String id) {
+    public int dischargeTrain(Train train, Platform platform) {
+
+        if (train.getTrainState() != TrainState.PROCEED && (train.getTrainState() != TrainState.SPLIT_AND_PROCEED))
+        { return 0; } // TODO: Exception
+
+        int unloadedPassengers = 0;
+
+        platform.parkTrain(train);
+
+        if (train.getTrainState() == TrainState.PROCEED ||
+                (   train.getTrainState() == TrainState.SPLIT_AND_PROCEED
+                        && train.getPlatform().getPlatformState() == PlatformState.BUSY
+                        && train.getSecondPlatform().getPlatformState() == PlatformState.BUSY)
+        ) {
+            unloadedPassengers = train.getPassengers();
+            train.disembarkAllPassengers();
+            System.out.println("Unloading all passangers from " + train);
+        }
+
+        return unloadedPassengers;
+    }
+
+    public Train findTrainByIdOrThrow(String id) {
         return waitingTrains.stream().filter(t -> t.getId().equals(id)).findFirst().orElseThrow(TrainNotFoundException::new);
     }
 }

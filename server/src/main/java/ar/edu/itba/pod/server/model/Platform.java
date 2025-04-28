@@ -20,8 +20,11 @@ public class Platform  implements Comparable<Platform> {
     }
 
     public synchronized void parkTrain(Train train) {
-        if (! platformState.equals(PlatformState.IDLE))
+        if (!platformState.equals(PlatformState.IDLE))
             throw new IllegalStateException(); // todo hacer excepción custom
+        if (!train.getPlatform().equals(this) && !train.getSecondPlatform().equals(this))
+            throw new IllegalStateException(); // todo hacer excepción custom
+
         this.train = train;
         platformState = PlatformState.BUSY;
     }
