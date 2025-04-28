@@ -1,5 +1,6 @@
 package ar.edu.itba.pod.server.model;
 
+import java.util.List;
 import java.util.Objects;
 
 public class Train {
@@ -24,6 +25,10 @@ public class Train {
     }
 
     public void disembarkAllPassengers() {
+        if (trainState.equals(TrainState.SPLIT_AND_PROCEED))
+            trainState = TrainState.IN_PLATFORM_DIVIDED;
+        else
+            trainState = TrainState.IN_PLATFORM;
         this.passengers = 0;
     }
 
@@ -37,6 +42,30 @@ public class Train {
             throw new IllegalStateException();
         this.secondPlatform = secondPlatform;
         trainState = TrainState.SPLIT_AND_PROCEED;
+    }
+
+    public void leavePlatform() {
+        List<TrainState> admisibleStates = List.of(TrainState.IN_PLATFORM, TrainState.IN_PLATFORM_DIVIDED, TrainState.READY_TO_LEAVE);
+        if (!admisibleStates.contains(trainState) || platform == null)
+            throw new IllegalStateException();
+        platform = null;
+        if (trainState.equals(TrainState.IN_PLATFORM_DIVIDED)) {
+            trainState = TrainState.READY_TO_LEAVE;
+            return;
+        }
+        trainState = TrainState.LEFT;
+    }
+
+    public void leaveSecondPlatform() {
+        List<TrainState> admisibleStates = List.of(TrainState.IN_PLATFORM, TrainState.IN_PLATFORM_DIVIDED, TrainState.READY_TO_LEAVE);
+        if (!admisibleStates.contains(trainState))
+            throw new IllegalStateException();
+        this.secondPlatform = null;
+        if (trainState.equals(TrainState.IN_PLATFORM_DIVIDED)) {
+            trainState = TrainState.READY_TO_LEAVE;
+            return;
+        }
+        trainState = TrainState.LEFT;
     }
 
     public boolean canSplitIntoTwo() {

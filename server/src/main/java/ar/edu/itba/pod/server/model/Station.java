@@ -124,6 +124,23 @@ public class Station {
         return unloadedPassengers;
     }
 
+    public void loadPassengersAndLeave(String trainId, int platformId, int passengers) {
+        Platform platform = getPlatform(platformId);
+        if (!platform.getPlatformState().equals(PlatformState.BUSY))
+            throw new IllegalStateException();
+
+        Optional<Train> trainOptional = platform.getTrain();
+        if (trainOptional.isEmpty() || !trainOptional.get().getId().equals(trainId))
+            throw new TrainNotFoundException();
+        Train train = trainOptional.get();
+
+        train.boardPassengers(passengers);
+        if (train.getPlatform().equals(platform))
+            train.leavePlatform();
+        else
+            train.leaveSecondPlatform();
+    }
+
     public Train findTrainByIdOrThrow(String id) {
         return waitingTrains.stream().filter(t -> t.getId().equals(id)).findFirst().orElseThrow(TrainNotFoundException::new);
     }
