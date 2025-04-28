@@ -117,6 +117,7 @@ public class Station {
         ) {
             unloadedPassengers = train.getPassengers();
             train.disembarkAllPassengers();
+            waitingTrains.remove(train);
             System.out.println("Unloading all passangers from " + train);
         }
 
