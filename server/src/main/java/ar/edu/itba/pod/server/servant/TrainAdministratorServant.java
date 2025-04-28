@@ -14,6 +14,7 @@ public class TrainAdministratorServant extends TrainAdministratorGrpc.TrainAdmin
         this.station = station;
     }
 
+    // TODO Make possible to requestPlatform with only train id (only for the case to check the request)
     @Override
     public void requestPlatform(TrainValue request, StreamObserver<TrainResponseData> responseObserver) {
         Global.Train requestTrain = request.getTrain();
@@ -41,13 +42,17 @@ public class TrainAdministratorServant extends TrainAdministratorGrpc.TrainAdmin
         int unloaded = station.dischargeTrain(train, platform);
 
         responseObserver.onNext(
-                ServantUtils.parseToTrainResponseData(train, platform.getId())
+                ServantUtils.parseToTrainResponseData(train, 0) // TODO Change signature of parsing method
         );
         responseObserver.onCompleted();
     }
 
     @Override
-    public void leavePlatform(TrainAndPlatformValue request, StreamObserver<TrainResponseData> responseObserver) {
-        System.out.println("TODO");
+    public void leavePlatform(TrainAndPlatformAndOccupancy request, StreamObserver<TrainResponseData> responseObserver) {
+        Train train = station.loadPassengersAndLeave(request.getTrain().getId(), request.getPlatform().getId(), request.getOccupancy());
+        responseObserver.onNext(
+                ServantUtils.parseToTrainResponseData(train, 0) // TODO Change signature of parsing method
+        );
+        responseObserver.onCompleted();
     }
 }

@@ -11,7 +11,7 @@ option java_multiple_files = true;
 service TrainAdministrator {
   rpc RequestPlatform(TrainValue) returns (TrainResponseData);
   rpc OccupyPlatform(TrainAndPlatformValue) returns (TrainResponseData);
-  rpc LeavePlatform(TrainAndPlatformValue) returns (TrainResponseData);
+  rpc LeavePlatform(TrainAndPlatformAndOccupancy) returns (TrainResponseData);
 }
 
 message TrainValue {
@@ -21,6 +21,12 @@ message TrainValue {
 message TrainAndPlatformValue {
   Train train = 1;
   Platform platform = 2;
+}
+
+message TrainAndPlatformAndOccupancy {
+  Train train = 1;
+  Platform platform = 2;
+  int32 occupancy = 3;
 }
 
 message TrainResponseData {

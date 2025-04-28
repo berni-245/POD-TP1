@@ -30,7 +30,7 @@ public class Platform  implements Comparable<Platform> {
     }
 
     public synchronized Optional<Train> departTrain() {
-        Optional<Train> toReturn = Optional.ofNullable(train);
+        Optional<Train> toReturn = Optional.ofNullable(train); // TODO Revisar si tiene que ser optional
         if (platformState.equals(PlatformState.BUSY)) {
             train = null;
             platformState = PlatformState.IDLE;

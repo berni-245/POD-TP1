@@ -103,28 +103,28 @@ public class Station {
 
     public int dischargeTrain(Train train, Platform platform) {
 
-        if (train.getTrainState() != TrainState.PROCEED && (train.getTrainState() != TrainState.SPLIT_AND_PROCEED))
-        { return 0; } // TODO: Exception
+        if (train.getTrainState() != TrainState.PROCEED && train.getTrainState() != TrainState.SPLIT_AND_PROCEED)
+            throw new IllegalStateException(); // TODO Custom
 
         int unloadedPassengers = 0;
 
         platform.parkTrain(train);
 
-        if (train.getTrainState() == TrainState.PROCEED ||
-                (   train.getTrainState() == TrainState.SPLIT_AND_PROCEED
-                        && train.getPlatform().getPlatformState() == PlatformState.BUSY
-                        && train.getSecondPlatform().getPlatformState() == PlatformState.BUSY)
+        if (train.getTrainState().equals(TrainState.PROCEED) ||
+                ((train.getTrainState().equals(TrainState.SPLIT_AND_PROCEED)
+                        && train.getPlatform().getPlatformState().equals(PlatformState.BUSY)
+                        && train.getSecondPlatform().getPlatformState().equals(PlatformState.BUSY)))
         ) {
             unloadedPassengers = train.getPassengers();
             train.disembarkAllPassengers();
-            waitingTrains.remove(train);
+            waitingTrains.poll();
             System.out.println("Unloading all passangers from " + train);
         }
 
         return unloadedPassengers;
     }
 
-    public void loadPassengersAndLeave(String trainId, int platformId, int passengers) {
+    public Train loadPassengersAndLeave(String trainId, int platformId, int passengers) {
         Platform platform = getPlatform(platformId);
         if (!platform.getPlatformState().equals(PlatformState.BUSY))
             throw new IllegalStateException();
@@ -132,13 +132,18 @@ public class Station {
         Optional<Train> trainOptional = platform.getTrain();
         if (trainOptional.isEmpty() || !trainOptional.get().getId().equals(trainId))
             throw new TrainNotFoundException();
+
         Train train = trainOptional.get();
 
         train.boardPassengers(passengers);
-        if (train.getPlatform().equals(platform))
+        if (train.getPlatform().equals(platform)) {
             train.leavePlatform();
-        else
+        }
+        else {
             train.leaveSecondPlatform();
+        }
+        platform.departTrain();
+        return train;
     }
 
     public Train findTrainByIdOrThrow(String id) {
