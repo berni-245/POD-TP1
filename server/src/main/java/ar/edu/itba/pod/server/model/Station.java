@@ -49,7 +49,6 @@ public class Station {
 
     // returns the trains ahead
     public int updateWaitingTrainState(Train train) {
-        // TODO creo que no hace falta esto, si el tren no existe se debería crear así que no debería pasar nunca esto?
         if (!waitingTrains.contains(train))
             throw new TrainNotFoundException();
 
