@@ -9,9 +9,9 @@ option java_outer_classname = "TrainAdministratorModel";
 option java_multiple_files = true;
 
 service TrainAdministrator {
-  rpc RequestPlatform(TrainValue) returns (TrainResponseData);
-  rpc OccupyPlatform(TrainAndPlatformValue) returns (TrainResponseData);
-  rpc LeavePlatform(TrainAndPlatformAndOccupancy) returns (TrainResponseData);
+  rpc RequestPlatform(TrainValue) returns (RequestPlatformResponse);
+  rpc OccupyPlatform(TrainAndPlatformValue) returns (OccupyPlatformResponse);
+  rpc LeavePlatform(TrainAndPlatformAndOccupancy) returns (TrainAndPlatformValue);
 }
 
 message TrainValue {
@@ -29,9 +29,16 @@ message TrainAndPlatformAndOccupancy {
   int32 occupancy = 3;
 }
 
-message TrainResponseData {
+message RequestPlatformResponse {
   Train train = 1;
   Platform platform = 2;
   Platform secondPlatform = 3;
   int32 trains_ahead = 4;
+}
+
+message OccupyPlatformResponse {
+  Train train = 1;
+  Platform platform = 2;
+  Platform secondPlatform = 3;
+  int32 previous_occupancy = 4;
 }

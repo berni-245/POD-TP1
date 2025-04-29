@@ -1,7 +1,9 @@
 package ar.edu.itba.pod.server.servant;
 
 import ar.edu.itba.pod.server.Global;
-import ar.edu.itba.pod.server.TrainResponseData;
+import ar.edu.itba.pod.server.OccupyPlatformResponse;
+import ar.edu.itba.pod.server.RequestPlatformResponse;
+import ar.edu.itba.pod.server.TrainAndPlatformValue;
 import ar.edu.itba.pod.server.model.Platform;
 import ar.edu.itba.pod.server.model.Size;
 import ar.edu.itba.pod.server.model.Train;
@@ -29,16 +31,38 @@ public class ServantUtils {
         return builder.build();
     }
 
-    static TrainResponseData parseToTrainResponseData(Train train, int trainsAhead) {
-        TrainResponseData.Builder builder = TrainResponseData.newBuilder();
+    static RequestPlatformResponse parseToRequestPlatformResponse(Train train, int trainsAhead) {
+        RequestPlatformResponse.Builder builder = RequestPlatformResponse.newBuilder();
         if (train != null) {
             builder.setTrain(parseTrainModelToGrpc(train));
             if (train.getPlatform() != null)
                 builder.setPlatform(parsePlatformModelToGrpc(train.getPlatform()));
             if (train.getSecondPlatform() != null)
                 builder.setSecondPlatform(parsePlatformModelToGrpc(train.getSecondPlatform()));
+            builder.setTrainsAhead(trainsAhead);
         }
-        builder.setTrainsAhead(trainsAhead);
+        return builder.build();
+    }
+
+    static OccupyPlatformResponse parseToOccupyPlatformResponse(Train train, int previousOccupancy) {
+        OccupyPlatformResponse.Builder builder = OccupyPlatformResponse.newBuilder();
+        if (train != null) {
+            builder.setTrain(parseTrainModelToGrpc(train));
+            if (train.getPlatform() != null)
+                builder.setPlatform(parsePlatformModelToGrpc(train.getPlatform()));
+            if (train.getSecondPlatform() != null)
+                builder.setSecondPlatform(parsePlatformModelToGrpc(train.getSecondPlatform()));
+            builder.setPreviousOccupancy(previousOccupancy);
+        }
+        return builder.build();
+    }
+
+    static TrainAndPlatformValue parseToTrainAndPlatformValue(Train train, Platform platform) {
+        TrainAndPlatformValue.Builder builder = TrainAndPlatformValue.newBuilder();
+        if (train != null)
+            builder.setTrain(parseTrainModelToGrpc(train));
+        if (platform != null)
+            builder.setPlatform(parsePlatformModelToGrpc(platform));
         return builder.build();
     }
 }

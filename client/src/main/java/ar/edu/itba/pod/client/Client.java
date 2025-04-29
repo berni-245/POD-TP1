@@ -1,3 +1,4 @@
+/*
 package ar.edu.itba.pod.client;
 
 import ar.edu.itba.pod.server.*;
@@ -35,7 +36,7 @@ public class Client {
                             .setHasDoubleTraction(true)
                             .build();
 
-            TrainResponseData trainResponseData;
+            RequestPlatformResponse trainResponseData;
             trainResponseData = trainStub.requestPlatform(TrainValue.newBuilder().setTrain(trainHola123).build());
             System.out.println(trainResponseData);
             System.out.println(trainResponseData.getTrainsAhead());
@@ -50,7 +51,10 @@ public class Client {
             System.out.println(platform1);
             System.out.println(platform2);
 
-            trainResponseData = trainStub.requestPlatform(TrainValue.newBuilder().setTrain(trainHola123).build());
+            trainResponseData =
+                    trainStub.requestPlatform(
+                            TrainValue.newBuilder().setTrain(Global.Train.newBuilder().setId("Hola123")).build()
+                    );
             System.out.print(trainResponseData);
             System.out.println(trainResponseData.getTrainsAhead());
 
@@ -72,7 +76,7 @@ public class Client {
                     .setPlatform(platform2)
                             .build();
             System.out.println("Occupy platform");
-            TrainResponseData trainResponseDataOccupy = trainStub.occupyPlatform(trainAndPlatformValue);
+            OccupyPlatformResponse trainResponseDataOccupy = trainStub.occupyPlatform(trainAndPlatformValue);
             System.out.println(trainResponseDataOccupy);
             System.out.println("Platform 2 state:");
             System.out.println(stub.checkState(Int32Value.newBuilder().setValue(2).build()));
@@ -82,13 +86,12 @@ public class Client {
                     .setPlatform(platform2)
                     .setOccupancy(10)
                     .build();
-            TrainResponseData trainResponseDataLeave = trainStub.leavePlatform(trainAndPlatformAndOccupancyValue);
+            TrainAndPlatformValue trainResponseDataLeave = trainStub.leavePlatform(trainAndPlatformAndOccupancyValue);
             System.out.println(trainResponseDataLeave);
-            System.out.println("Platform 2 state:");
-            System.out.println(stub.checkState(Int32Value.newBuilder().setValue(2).build()));
 
         } finally {
             channel.shutdown().awaitTermination(10, TimeUnit.SECONDS);
         }
     }
 }
+*/
