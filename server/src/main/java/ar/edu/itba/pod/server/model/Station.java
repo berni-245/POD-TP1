@@ -38,8 +38,7 @@ public class Station {
     }
 
     public Train addTrainOrGet(String trainId, Size trainSize, int passengers, boolean doubleTraction) {
-        Train train = new Train(trainId, trainSize, doubleTraction);
-        train.boardPassengers(passengers);
+        Train train = new Train(trainId, trainSize, doubleTraction, passengers);
         if (waitingTrains.contains(train))
             return getWaitingTrain(trainId, trainSize, passengers, doubleTraction);
         waitingTrains.add(train);
@@ -62,7 +61,8 @@ public class Station {
 
         for (Size size : Size.valuesFromSize(train.getTrainSize())) {
             for (Platform platform : platforms.get(size).values()) {
-                if (platform.getPlatformState().equals(PlatformState.IDLE) && train.associatePlatform(platform)) {
+                if (platform.getPlatformState().equals(PlatformState.IDLE)) {
+                    train.associatePlatform(platform);
                     return 0;
                 }
             }
@@ -72,16 +72,16 @@ public class Station {
             Platform firstPlatform = null;
             Size size = Size.fromOrdinal(train.getTrainSize().ordinal() - 1);
             for (Platform platform : platforms.get(size).values()) {
+                // TODO preguntar si tiene sentido asegurarse que sea IDLE durante toda la iteración, para mí que no
+                // TODO ya que, incluso pasado este método, se podrán seguir cerrando las estaciones
                 if (!platform.getPlatformState().equals(PlatformState.IDLE)) {
                     continue;
                 }
-                if (firstPlatform == null) {
+                if (firstPlatform == null)
                     firstPlatform = platform;
-                }
-                else if (!train.associatePlatform(firstPlatform)) {
-                    firstPlatform = platform;
-                }
-                else if (train.associateSecondPlatform(platform)) {
+
+                else {
+                    train.associateTwoPlatform(firstPlatform, platform);
                     return 0;
                 }
             }

@@ -6,6 +6,8 @@ import ar.edu.itba.pod.server.exception.TrainNotFoundException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class Platform implements Comparable<Platform> {
     private static final AtomicInteger currentId = new AtomicInteger(1);
@@ -21,17 +23,11 @@ public class Platform implements Comparable<Platform> {
         this.train = null;
     }
 
-    public synchronized boolean reservePlatform(Train train) {
-        if (!platformState.equals(PlatformState.IDLE) || train != null)
-            return false;
-        this.train = train;
-        return true;
-    }
-
+    // returns if the train is fully park
     public synchronized boolean parkTrain(Train train) {
         if (!platformState.equals(PlatformState.IDLE))
             throw new IllegalPlatformStateException("Platform is not free and open for parking");
-        Platform otherPlatform = null;
+        Platform otherPlatform;
         if (train.getPlatform().equals(this))
             otherPlatform = train.getSecondPlatform();
         else if (train.getSecondPlatform().equals(this))
@@ -42,7 +38,10 @@ public class Platform implements Comparable<Platform> {
         this.train = train;
         platformState = PlatformState.BUSY;
 
-        return (train.getTrainState().equals(TrainState.PROCEED) || (train.getTrainState().equals(TrainState.SPLIT_AND_PROCEED) && otherPlatform.getPlatformState().equals(PlatformState.BUSY)));
+        return (train.getTrainState().equals(TrainState.PROCEED) ||
+                (train.getTrainState().equals(TrainState.SPLIT_AND_PROCEED)
+                && otherPlatform.getPlatformState().equals(PlatformState.BUSY))
+        );
     }
 
     public synchronized void departTrain(Train train) {

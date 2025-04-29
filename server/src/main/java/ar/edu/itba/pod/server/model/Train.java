@@ -2,10 +2,8 @@ package ar.edu.itba.pod.server.model;
 
 import ar.edu.itba.pod.server.exception.IllegalTrainStateException;
 
-import javax.lang.model.type.NullType;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Consumer;
 
 public class Train {
     private final String id;
@@ -16,19 +14,21 @@ public class Train {
     private Platform platform;
     private Platform secondPlatform;
 
-    public Train(String id, Size trainSize, boolean doubleTraction) {
+    public Train(String id, Size trainSize, boolean doubleTraction, int initialPassengers) {
         this.id = id;
         this.trainSize = trainSize;
         this.doubleTraction = doubleTraction;
-        this.passengers = 0;
+        this.passengers = initialPassengers;
         trainState = TrainState.WAITING;
     }
 
-    public void boardPassengers(int passengers) {
+    public synchronized void boardPassengers(int passengers) {
+        if (!trainState.equals(TrainState.IN_PLATFORM) && !trainState.equals(TrainState.IN_PLATFORM_DIVIDED))
+            throw new IllegalTrainStateException("Cannot board passengers outside of platform");
         this.passengers += passengers;
     }
 
-    public void disembarkAllPassengers() {
+    public synchronized void disembarkAllPassengers() {
         if (trainState.equals(TrainState.SPLIT_AND_PROCEED))
             trainState = TrainState.IN_PLATFORM_DIVIDED;
         else
@@ -36,29 +36,29 @@ public class Train {
         this.passengers = 0;
     }
 
-    public boolean associatePlatform(Platform platform) {
-        if (!platform.reservePlatform(this)) {
-            return false;
-        }
+    public synchronized void associatePlatform(Platform platform) {
+        List<TrainState> admissibleStates = List.of(TrainState.WAITING, TrainState.PROCEED, TrainState.SPLIT_AND_PROCEED);
+        if (!admissibleStates.contains(trainState))
+            throw new IllegalTrainStateException("The train is not waiting for a platform");
         this.platform = platform;
         trainState = TrainState.PROCEED;
-        return true;
     }
 
-    public boolean associateSecondPlatform(Platform secondPlatform) {
+    // must be called after associatePlatform for double traction trains
+    public synchronized void associateTwoPlatform(Platform firstPlatform, Platform secondPlatform) {
         if (!canSplitIntoTwo())
             throw new IllegalTrainStateException("The train can't be split into two");
+        associatePlatform(firstPlatform);
         this.secondPlatform = secondPlatform;
         trainState = TrainState.SPLIT_AND_PROCEED;
-        return true;
     }
 
-    public void leavePlatform() {
+    public synchronized void leavePlatform() {
         readyStateToLeavePlatform();
         platform = null;
     }
 
-    public void leaveSecondPlatform() {
+    public synchronized void leaveSecondPlatform() {
         readyStateToLeavePlatform();
         this.secondPlatform = null;
     }
