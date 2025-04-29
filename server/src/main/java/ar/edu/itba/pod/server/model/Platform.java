@@ -92,11 +92,11 @@ public class Platform implements Comparable<Platform> {
         return platformSize;
     }
 
-    public PlatformState getPlatformState() {
+    public synchronized PlatformState getPlatformState() {
         return platformState;
     }
 
-    public Optional<Train> getTrain() {
+    public synchronized Optional<Train> getTrain() {
         return Optional.ofNullable(train);
     }
 }

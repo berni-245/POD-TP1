@@ -37,7 +37,7 @@ public class Station {
         return platform;
     }
 
-    public Train addTrainOrGet(String trainId, Size trainSize, int passengers, boolean doubleTraction) {
+    public synchronized Train addTrainOrGet(String trainId, Size trainSize, int passengers, boolean doubleTraction) {
         Train train = new Train(trainId, trainSize, doubleTraction, passengers);
         if (waitingTrains.contains(train))
             return getWaitingTrain(trainId, trainSize, passengers, doubleTraction);
@@ -45,18 +45,33 @@ public class Station {
         return train;
     }
 
-    public int updateWaitingTrainState(Train train) {
-        if (!waitingTrains.contains(train))
-            throw new TrainNotFoundException();
+    public synchronized Train getWaitingTrain(String id, Size trainSize, int passengers, boolean doubleTraction) {
+        Train train = findWaitingTrainByIdOrThrow(id);
 
-        if (!waitingTrains.peek().equals(train)) {
-            int ahead = 0;
-            for (Train t : waitingTrains) {
-                if (t.equals(train))
-                    break;
-                ahead++;
+        if (!train.getTrainSize().equals(trainSize) || train.isDoubleTraction() != doubleTraction || train.getPassengers() != passengers)
+            throw new TrainConflictException();
+
+        return train;
+    }
+
+    public synchronized Train findWaitingTrainByIdOrThrow(String id) {
+        return waitingTrains.stream().filter(t -> t.getId().equals(id)).findFirst().orElseThrow(TrainNotFoundException::new);
+    }
+
+    public int updateWaitingTrainState(Train train) {
+        synchronized (this) { // make sure the queue doesn't change
+            if (!waitingTrains.contains(train))
+                throw new TrainNotFoundException();
+
+            if (!waitingTrains.peek().equals(train)) {
+                int ahead = 0;
+                for (Train t : waitingTrains) {
+                    if (t.equals(train))
+                        break;
+                    ahead++;
+                }
+                return ahead;
             }
-            return ahead;
         }
 
         for (Size size : Size.valuesFromSize(train.getTrainSize())) {
@@ -89,16 +104,7 @@ public class Station {
         return 0;
     }
 
-    public Train getWaitingTrain(String id, Size trainSize, int passengers, boolean doubleTraction) {
-        Train train = findTrainByIdOrThrow(id);
-
-        if (!train.getTrainSize().equals(trainSize) || train.isDoubleTraction() != doubleTraction || train.getPassengers() != passengers)
-            throw new TrainConflictException();
-
-        return train;
-    }
-
-    public int dischargeTrain(Train train, Platform platform) {
+    public synchronized int dischargeTrain(Train train, Platform platform) {
         if (train.getTrainState() != TrainState.PROCEED && train.getTrainState() != TrainState.SPLIT_AND_PROCEED)
             throw new TrainCannotParkException();
 
@@ -123,18 +129,16 @@ public class Station {
             throw new TrainNotFoundException();
 
         Train train = trainOptional.get();
-        train.boardPassengers(passengers);
+        synchronized (train) {
+            train.boardPassengers(passengers);
 
-        if (train.getPlatform().equals(platform))
-            train.leavePlatform();
-        else
-            train.leaveSecondPlatform();
+            if (train.getPlatform().equals(platform))
+                train.leavePlatform();
+            else
+                train.leaveSecondPlatform();
 
-        platform.departTrain(train);
+            platform.departTrain(train);
+        }
         return train;
-    }
-
-    public Train findTrainByIdOrThrow(String id) {
-        return waitingTrains.stream().filter(t -> t.getId().equals(id)).findFirst().orElseThrow(TrainNotFoundException::new);
     }
 }

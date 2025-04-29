@@ -94,19 +94,19 @@ public class Train {
         return doubleTraction;
     }
 
-    public int getPassengers() {
+    public synchronized int getPassengers() {
         return passengers;
     }
 
-    public TrainState getTrainState() {
+    public synchronized TrainState getTrainState() {
         return trainState;
     }
 
-    public Platform getPlatform() {
+    public synchronized Platform getPlatform() {
         return platform;
     }
 
-    public Platform getSecondPlatform() {
+    public synchronized Platform getSecondPlatform() {
         return secondPlatform;
     }
 

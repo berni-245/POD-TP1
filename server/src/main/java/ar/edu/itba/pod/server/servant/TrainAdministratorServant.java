@@ -20,7 +20,7 @@ public class TrainAdministratorServant extends TrainAdministratorGrpc.TrainAdmin
         Global.Train requestTrain = request.getTrain();
         Train train;
         if (requestTrain.getTrainSize().equals(Global.Size.UNRECOGNIZED) || requestTrain.getOccupancyNumber() == 0)
-            train = station.findTrainByIdOrThrow(requestTrain.getId());
+            train = station.findWaitingTrainByIdOrThrow(requestTrain.getId());
         else
             train = station.addTrainOrGet(
                     requestTrain.getId(),
@@ -39,7 +39,7 @@ public class TrainAdministratorServant extends TrainAdministratorGrpc.TrainAdmin
     public void occupyPlatform(TrainAndPlatformValue request, StreamObserver<OccupyPlatformResponse> responseObserver) {
         Global.Train requestTrain = request.getTrain();
         Global.Platform requestPlatform = request.getPlatform();
-        Train train = station.findTrainByIdOrThrow(requestTrain.getId());
+        Train train = station.findWaitingTrainByIdOrThrow(requestTrain.getId());
         Platform platform = station.getPlatform(requestPlatform.getId());
         int previousPassengers = station.dischargeTrain(train, platform);
         responseObserver.onNext(
