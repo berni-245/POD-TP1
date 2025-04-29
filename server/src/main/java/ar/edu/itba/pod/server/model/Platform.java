@@ -28,24 +28,31 @@ public class Platform implements Comparable<Platform> {
         return true;
     }
 
-    public synchronized void parkTrain(Train train) {
+    public synchronized boolean parkTrain(Train train) {
         if (!platformState.equals(PlatformState.IDLE))
             throw new IllegalPlatformStateException("Platform is not free and open for parking");
-        if (!train.getPlatform().equals(this) && !train.getSecondPlatform().equals(this))
+        Platform otherPlatform = null;
+        if (train.getPlatform().equals(this))
+            otherPlatform = train.getSecondPlatform();
+        else if (train.getSecondPlatform().equals(this))
+            otherPlatform = train.getPlatform();
+        else
             throw new IllegalPlatformStateException("The train is not allowed to park in this platform");
 
         this.train = train;
         platformState = PlatformState.BUSY;
+
+        return (train.getTrainState().equals(TrainState.PROCEED) || (train.getTrainState().equals(TrainState.SPLIT_AND_PROCEED) && otherPlatform.getPlatformState().equals(PlatformState.BUSY)));
     }
 
-    public synchronized Train departTrain() {
+    public synchronized void departTrain(Train train) {
         if (!platformState.equals(PlatformState.BUSY))
             throw new TrainNotFoundException("There is no train in the platform");
-        Train toReturn = train;
-        train = null;
-        platformState = PlatformState.IDLE;
+        if (!train.equals(this.train))
+            throw new TrainNotFoundException("This platform does not contain the train that is trying to depart");
 
-        return toReturn;
+        this.train = null;
+        platformState = PlatformState.IDLE;
     }
 
     public synchronized void toggleState() {

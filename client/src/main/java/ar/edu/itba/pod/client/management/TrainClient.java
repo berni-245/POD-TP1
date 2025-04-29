@@ -91,13 +91,15 @@ public class TrainClient {
                             .setOccupancy(Integer.parseInt(occupancy))
                             .build();
                     trainAndPlatformReply = stub.leavePlatform(trainAndPlatformAndOccupancy);
-                    // TODO: para el caso de split se corta en tamaño de plataforma
-                    System.out.printf("\uD83D\uDE85%s (%s) left \uD83D\uDE89 Platform #%d (%s) after loading %d\uD83E\uDDCD",
+
+                    System.out.printf("\uD83D\uDE85%s (%s) %s \uD83D\uDE89 Platform #%d (%s)%s",
                             trainAndPlatformReply.getTrain().getHasDoubleTraction() ? "\uD83D\uDE85" : "",
                             trainAndPlatformReply.getTrain().getTrainSize(),
+                            trainAndPlatformReply.getTrain().getTrainState(),
                             trainAndPlatformReply.getPlatform().getId(),
                             trainAndPlatformReply.getPlatform().getPlatformSize(),
-                            trainAndPlatformReply.getTrain().getOccupancyNumber()
+                            trainAndPlatformReply.getTrain().getTrainState().equals(Global.TrainState.TRAIN_STATE_READY_TO_LEAVE) ?
+                                    "" : " after loading %d \uD83E\uDDCD".formatted(trainAndPlatformReply.getTrain().getOccupancyNumber())
                     );
                 }
                 default -> {

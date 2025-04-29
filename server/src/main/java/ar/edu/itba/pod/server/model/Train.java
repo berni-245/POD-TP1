@@ -50,7 +50,6 @@ public class Train {
             throw new IllegalTrainStateException("The train can't be split into two");
         this.secondPlatform = secondPlatform;
         trainState = TrainState.SPLIT_AND_PROCEED;
-
         return true;
     }
 
@@ -64,7 +63,7 @@ public class Train {
         this.secondPlatform = null;
     }
 
-    private void readyStateToLeavePlatform() {
+    private synchronized void readyStateToLeavePlatform() {
         List<TrainState> admisibleStates = List.of(TrainState.IN_PLATFORM, TrainState.IN_PLATFORM_DIVIDED, TrainState.READY_TO_LEAVE);
         if (!admisibleStates.contains(trainState))
             throw new IllegalTrainStateException("The train is not in a platform");
@@ -72,7 +71,10 @@ public class Train {
             trainState = TrainState.READY_TO_LEAVE;
             return;
         }
-        trainState = TrainState.LEFT;
+        if (trainState.equals(TrainState.READY_TO_LEAVE))
+            trainState = TrainState.REJOINED_AND_LEFT;
+        else
+            trainState = TrainState.LEFT;
     }
 
 

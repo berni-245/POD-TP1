@@ -39,12 +39,9 @@ public class TrainAdministratorServant extends TrainAdministratorGrpc.TrainAdmin
     public void occupyPlatform(TrainAndPlatformValue request, StreamObserver<OccupyPlatformResponse> responseObserver) {
         Global.Train requestTrain = request.getTrain();
         Global.Platform requestPlatform = request.getPlatform();
-
         Train train = station.findTrainByIdOrThrow(requestTrain.getId());
         Platform platform = station.getPlatform(requestPlatform.getId());
-
         int previousPassengers = station.dischargeTrain(train, platform);
-
         responseObserver.onNext(
                 ServantUtils.parseToOccupyPlatformResponse(train, previousPassengers)
         );

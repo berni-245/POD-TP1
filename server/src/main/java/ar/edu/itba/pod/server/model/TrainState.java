@@ -7,6 +7,7 @@ public enum TrainState {
     IN_PLATFORM,
     IN_PLATFORM_DIVIDED,
     READY_TO_LEAVE,
-    LEFT
+    LEFT,
+    REJOINED_AND_LEFT
     ;
 }

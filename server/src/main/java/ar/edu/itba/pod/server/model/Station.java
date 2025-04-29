@@ -99,19 +99,12 @@ public class Station {
     }
 
     public int dischargeTrain(Train train, Platform platform) {
-
         if (train.getTrainState() != TrainState.PROCEED && train.getTrainState() != TrainState.SPLIT_AND_PROCEED)
             throw new TrainCannotParkException();
 
         int unloadedPassengers = 0;
-
-        platform.parkTrain(train);
-
-        if (train.getTrainState().equals(TrainState.PROCEED) ||
-                ((train.getTrainState().equals(TrainState.SPLIT_AND_PROCEED)
-                        && train.getPlatform().getPlatformState().equals(PlatformState.BUSY)
-                        && train.getSecondPlatform().getPlatformState().equals(PlatformState.BUSY)))
-        ) {
+        boolean trainIsFullyParked = platform.parkTrain(train);
+        if (trainIsFullyParked) {
             unloadedPassengers = train.getPassengers();
             train.disembarkAllPassengers();
             waitingTrains.poll();
@@ -130,15 +123,14 @@ public class Station {
             throw new TrainNotFoundException();
 
         Train train = trainOptional.get();
-
         train.boardPassengers(passengers);
-        if (train.getPlatform().equals(platform)) {
+
+        if (train.getPlatform().equals(platform))
             train.leavePlatform();
-        }
-        else {
+        else
             train.leaveSecondPlatform();
-        }
-        platform.departTrain();
+
+        platform.departTrain(train);
         return train;
     }
 
