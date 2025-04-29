@@ -1,7 +1,11 @@
 package ar.edu.itba.pod.server.model;
 
+import ar.edu.itba.pod.server.exception.IllegalTrainStateException;
+
+import javax.lang.model.type.NullType;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 public class Train {
     private final String id;
@@ -39,16 +43,25 @@ public class Train {
 
     public void associateSecondPlatform(Platform secondPlatform) {
         if (!canSplitIntoTwo())
-            throw new IllegalStateException();
+            throw new IllegalTrainStateException("The train can't be split into two");
         this.secondPlatform = secondPlatform;
         trainState = TrainState.SPLIT_AND_PROCEED;
     }
 
     public void leavePlatform() {
-        List<TrainState> admisibleStates = List.of(TrainState.IN_PLATFORM, TrainState.IN_PLATFORM_DIVIDED, TrainState.READY_TO_LEAVE);
-        if (!admisibleStates.contains(trainState) || platform == null)
-            throw new IllegalStateException();
+        readyStateToLeavePlatform();
         platform = null;
+    }
+
+    public void leaveSecondPlatform() {
+        readyStateToLeavePlatform();
+        this.secondPlatform = null;
+    }
+
+    private void readyStateToLeavePlatform() {
+        List<TrainState> admisibleStates = List.of(TrainState.IN_PLATFORM, TrainState.IN_PLATFORM_DIVIDED, TrainState.READY_TO_LEAVE);
+        if (!admisibleStates.contains(trainState))
+            throw new IllegalTrainStateException("The train is not in a platform");
         if (trainState.equals(TrainState.IN_PLATFORM_DIVIDED)) {
             trainState = TrainState.READY_TO_LEAVE;
             return;
@@ -56,17 +69,6 @@ public class Train {
         trainState = TrainState.LEFT;
     }
 
-    public void leaveSecondPlatform() {
-        List<TrainState> admisibleStates = List.of(TrainState.IN_PLATFORM, TrainState.IN_PLATFORM_DIVIDED, TrainState.READY_TO_LEAVE);
-        if (!admisibleStates.contains(trainState))
-            throw new IllegalStateException();
-        this.secondPlatform = null;
-        if (trainState.equals(TrainState.IN_PLATFORM_DIVIDED)) {
-            trainState = TrainState.READY_TO_LEAVE;
-            return;
-        }
-        trainState = TrainState.LEFT;
-    }
 
     public boolean canSplitIntoTwo() {
         return doubleTraction && trainSize != Size.SMALL;
@@ -109,12 +111,6 @@ public class Train {
     @Override
     public boolean equals(Object obj) {
         return obj instanceof Train train && id.equals(train.id);
-    }
-
-    public boolean strictEquals(Train train) {
-        return id.equals(train.id)
-                && trainSize.equals(train.trainSize)
-                && doubleTraction == train.doubleTraction;
     }
 
     @Override

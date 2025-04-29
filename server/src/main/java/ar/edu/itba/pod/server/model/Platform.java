@@ -1,6 +1,7 @@
 package ar.edu.itba.pod.server.model;
 
-import ar.edu.itba.pod.server.exception.IllegalPlatformToggleStateException;
+import ar.edu.itba.pod.server.exception.IllegalPlatformStateException;
+import ar.edu.itba.pod.server.exception.TrainNotFoundException;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -21,26 +22,27 @@ public class Platform  implements Comparable<Platform> {
 
     public synchronized void parkTrain(Train train) {
         if (!platformState.equals(PlatformState.IDLE))
-            throw new IllegalStateException(); // todo hacer excepción custom
+            throw new IllegalPlatformStateException("Platform is not free and open for parking");
         if (!train.getPlatform().equals(this) && !train.getSecondPlatform().equals(this))
-            throw new IllegalStateException(); // todo hacer excepción custom
+            throw new IllegalPlatformStateException("The train is not allowed to park in this platform");
 
         this.train = train;
         platformState = PlatformState.BUSY;
     }
 
-    public synchronized Optional<Train> departTrain() {
-        Optional<Train> toReturn = Optional.ofNullable(train); // TODO Revisar si tiene que ser optional
-        if (platformState.equals(PlatformState.BUSY)) {
-            train = null;
-            platformState = PlatformState.IDLE;
-        }
+    public synchronized Train departTrain() {
+        if (!platformState.equals(PlatformState.BUSY))
+            throw new TrainNotFoundException("There is no train in the platform");
+        Train toReturn = train;
+        train = null;
+        platformState = PlatformState.IDLE;
+
         return toReturn;
     }
 
     public synchronized void toggleState() {
         if (platformState.equals(PlatformState.BUSY))
-            throw new IllegalPlatformToggleStateException();
+            throw new IllegalPlatformStateException("Cannot perform such operation on the platform because it has a train");
 
         if (platformState.equals(PlatformState.IDLE))
             platformState = PlatformState.CLOSED;

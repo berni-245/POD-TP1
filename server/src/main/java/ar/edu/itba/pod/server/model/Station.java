@@ -1,7 +1,6 @@
 package ar.edu.itba.pod.server.model;
 
-import ar.edu.itba.pod.server.exception.PlatformNotFoundException;
-import ar.edu.itba.pod.server.exception.TrainNotFoundException;
+import ar.edu.itba.pod.server.exception.*;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -50,7 +49,8 @@ public class Station {
 
     // returns the trains ahead
     public int updateWaitingTrainState(Train train) {
-        if (waitingTrains.isEmpty())
+        // TODO creo que no hace falta esto, si el tren no existe se debería crear así que no debería pasar nunca esto?
+        if (!waitingTrains.contains(train))
             throw new TrainNotFoundException();
 
         if (!waitingTrains.peek().equals(train)) {
@@ -58,7 +58,7 @@ public class Station {
             for (Train t : waitingTrains) {
                 if (t.equals(train)) break;
                 ahead++;
-            } // TODO exception if not in the list
+            }
             return ahead;
         }
 
@@ -94,8 +94,8 @@ public class Station {
     public Train getWaitingTrain(String id, Size trainSize, int passengers, boolean doubleTraction) {
         Train train = findTrainByIdOrThrow(id);
         System.out.println(train);
-        if (!train.strictEquals(new Train(id, trainSize, doubleTraction)) || train.getPassengers() != passengers) {
-            throw new IllegalStateException(); // TODO custom
+        if (!train.getTrainSize().equals(trainSize) || train.isDoubleTraction() != doubleTraction || train.getPassengers() != passengers) {
+            throw new TrainConflictException();
         }
 
         return train;
@@ -104,7 +104,7 @@ public class Station {
     public int dischargeTrain(Train train, Platform platform) {
 
         if (train.getTrainState() != TrainState.PROCEED && train.getTrainState() != TrainState.SPLIT_AND_PROCEED)
-            throw new IllegalStateException(); // TODO Custom
+            throw new TrainCannotParkException();
 
         int unloadedPassengers = 0;
 
@@ -118,7 +118,6 @@ public class Station {
             unloadedPassengers = train.getPassengers();
             train.disembarkAllPassengers();
             waitingTrains.poll();
-            System.out.println("Unloading all passangers from " + train);
         }
 
         return unloadedPassengers;
@@ -127,7 +126,7 @@ public class Station {
     public Train loadPassengersAndLeave(String trainId, int platformId, int passengers) {
         Platform platform = getPlatform(platformId);
         if (!platform.getPlatformState().equals(PlatformState.BUSY))
-            throw new IllegalStateException();
+            throw new IllegalPlatformStateException("The platform is not busy with a train");
 
         Optional<Train> trainOptional = platform.getTrain();
         if (trainOptional.isEmpty() || !trainOptional.get().getId().equals(trainId))

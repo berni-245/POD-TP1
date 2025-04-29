@@ -17,7 +17,7 @@ public enum Size {
 
     public static Size fromOrdinal(int ordinal) {
         if (ordinal < 0 || ordinal >= values().length)
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("Ordinal is not within the enum");
 
         return values()[ordinal];
     }
