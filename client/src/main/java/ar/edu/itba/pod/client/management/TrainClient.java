@@ -29,7 +29,6 @@ public class TrainClient {
             logger.error("Missing argument (Train Client)");
             return;
         }
-
         final ManagedChannel channel = ManagedChannelBuilder.forTarget(serverAddress).usePlaintext().build();
 
         try {
@@ -37,7 +36,6 @@ public class TrainClient {
 
             switch (action) {
                 case "request" -> {
-                    // TODO: Deberia funcionar tambien con solo el ID del tren si ya se invocó antes. También deberia mostrar ambas plataformas en caso split
                     RequestPlatformResponse platformReply;
                     Global.Size protoSize = parseSize(size);
                     Global.Train protoTrain = Global.Train.newBuilder()

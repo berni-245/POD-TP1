@@ -7,17 +7,25 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class Platform  implements Comparable<Platform> {
+public class Platform implements Comparable<Platform> {
     private static final AtomicInteger currentId = new AtomicInteger(1);
     private final int id;
     private final Size platformSize;
     private PlatformState platformState;
-    private Train train = null;
+    private Train train;
 
     public Platform(Size platformSize) {
         this.id = currentId.getAndIncrement();
         this.platformSize = platformSize;
         this.platformState = PlatformState.IDLE;
+        this.train = null;
+    }
+
+    public synchronized boolean reservePlatform(Train train) {
+        if (!platformState.equals(PlatformState.IDLE) || train != null)
+            return false;
+        this.train = train;
+        return true;
     }
 
     public synchronized void parkTrain(Train train) {

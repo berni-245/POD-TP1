@@ -10,16 +10,15 @@ public class Station {
     private final Map<Size, SortedMap<Integer, Platform>> platforms;
 
     public Station() {
-        this.platforms = new HashMap<>();
-        for(Size size : Size.values())
-            platforms.put(size, new ConcurrentSkipListMap<>()); // these pair of references won't change
-
+        this.platforms = new EnumMap<>(Size.class);
+        for (Size size : Size.values()) {
+            platforms.put(size, new ConcurrentSkipListMap<>()); // These pair of references won't change
+        }
     }
 
     public Platform addPlatform(Size platformSize) {
         Platform platform = new Platform(platformSize);
         platforms.get(platformSize).put(platform.getId(), platform);
-        System.out.println(platforms);
         return platform;
     }
 
@@ -47,7 +46,6 @@ public class Station {
         return train;
     }
 
-    // returns the trains ahead
     public int updateWaitingTrainState(Train train) {
         if (!waitingTrains.contains(train))
             throw new TrainNotFoundException();
@@ -55,7 +53,8 @@ public class Station {
         if (!waitingTrains.peek().equals(train)) {
             int ahead = 0;
             for (Train t : waitingTrains) {
-                if (t.equals(train)) break;
+                if (t.equals(train))
+                    break;
                 ahead++;
             }
             return ahead;
@@ -63,27 +62,27 @@ public class Station {
 
         for (Size size : Size.valuesFromSize(train.getTrainSize())) {
             for (Platform platform : platforms.get(size).values()) {
-                if (platform.getPlatformState().equals(PlatformState.IDLE)) {
-                    train.associatePlatform(platform);
+                if (platform.getPlatformState().equals(PlatformState.IDLE) && train.associatePlatform(platform)) {
                     return 0;
                 }
             }
         }
 
         if (train.canSplitIntoTwo()) {
-            Platform platform1 = null;
-            for (Size size : Size.valuesFromSize(Size.fromOrdinal(train.getTrainSize().ordinal() - 1))) {
-                for (Platform platform : platforms.get(size).values()) {
-                    if (platform.getPlatformState().equals(PlatformState.IDLE)) {
-                        if (platform1 == null) {
-                            platform1 = platform;
-                        }
-                        else {
-                            train.associatePlatform(platform1);
-                            train.associateSecondPlatform(platform);
-                            return 0;
-                        }
-                    }
+            Platform firstPlatform = null;
+            Size size = Size.fromOrdinal(train.getTrainSize().ordinal() - 1);
+            for (Platform platform : platforms.get(size).values()) {
+                if (!platform.getPlatformState().equals(PlatformState.IDLE)) {
+                    continue;
+                }
+                if (firstPlatform == null) {
+                    firstPlatform = platform;
+                }
+                else if (!train.associatePlatform(firstPlatform)) {
+                    firstPlatform = platform;
+                }
+                else if (train.associateSecondPlatform(platform)) {
+                    return 0;
                 }
             }
         }
@@ -92,10 +91,9 @@ public class Station {
 
     public Train getWaitingTrain(String id, Size trainSize, int passengers, boolean doubleTraction) {
         Train train = findTrainByIdOrThrow(id);
-        System.out.println(train);
-        if (!train.getTrainSize().equals(trainSize) || train.isDoubleTraction() != doubleTraction || train.getPassengers() != passengers) {
+
+        if (!train.getTrainSize().equals(trainSize) || train.isDoubleTraction() != doubleTraction || train.getPassengers() != passengers)
             throw new TrainConflictException();
-        }
 
         return train;
     }

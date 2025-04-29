@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import java.util.concurrent.TimeUnit;
 
 public class PlatformClient {
-
     private static final int TIMEOUT = 10;
     private static final Logger logger = LoggerFactory.getLogger(PlatformClient.class);
 

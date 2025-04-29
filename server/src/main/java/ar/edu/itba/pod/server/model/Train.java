@@ -36,16 +36,22 @@ public class Train {
         this.passengers = 0;
     }
 
-    public void associatePlatform(Platform platform) {
+    public boolean associatePlatform(Platform platform) {
+        if (!platform.reservePlatform(this)) {
+            return false;
+        }
         this.platform = platform;
         trainState = TrainState.PROCEED;
+        return true;
     }
 
-    public void associateSecondPlatform(Platform secondPlatform) {
+    public boolean associateSecondPlatform(Platform secondPlatform) {
         if (!canSplitIntoTwo())
             throw new IllegalTrainStateException("The train can't be split into two");
         this.secondPlatform = secondPlatform;
         trainState = TrainState.SPLIT_AND_PROCEED;
+
+        return true;
     }
 
     public void leavePlatform() {
