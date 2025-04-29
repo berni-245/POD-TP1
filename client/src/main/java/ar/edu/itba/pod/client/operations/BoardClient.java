@@ -8,7 +8,6 @@ public class BoardClient {
     private static final Logger logger = LoggerFactory.getLogger(BoardClient.class);
 
     public static void main(String[] args) {
-
         logger.info("Board Client Starting ...");
 
         final String serverAddress = System.getProperty("serverAddress");

@@ -80,7 +80,7 @@ public class Client {
             System.out.println(trainResponseDataOccupy);
             System.out.println("Platform 2 state:");
             System.out.println(stub.checkState(Int32Value.newBuilder().setValue(2).build()));
-            System.out.println("Leave platform");
+            System.out.println("Leave platform");/*
             TrainAndPlatformAndOccupancy trainAndPlatformAndOccupancyValue = TrainAndPlatformAndOccupancy.newBuilder()
                     .setTrain(trainHola123)
                     .setPlatform(platform2)
