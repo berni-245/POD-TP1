@@ -4,4 +4,8 @@ public class TrainCannotParkException extends RuntimeException {
     public TrainCannotParkException() {
         super("Train is not allowed to proceed to this platform");
     }
+
+    public TrainCannotParkException(String message) {
+        super(message);
+    }
 }
