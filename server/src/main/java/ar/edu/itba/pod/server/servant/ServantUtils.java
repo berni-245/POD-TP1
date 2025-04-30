@@ -5,6 +5,7 @@ import ar.edu.itba.pod.server.model.BoardView;
 import ar.edu.itba.pod.server.model.Platform;
 import ar.edu.itba.pod.server.model.Train;
 
+import java.util.List;
 import java.util.Optional;
 
 public class ServantUtils {
@@ -74,5 +75,12 @@ public class ServantUtils {
         }
 
         return builder.build();
+    }
+
+    static TrainList TrainListModelToGrpc(List<Train> trainList) {
+        TrainList.Builder toReturn = TrainList.newBuilder();
+        for (Train train : trainList)
+            toReturn.addTrainList(ServantUtils.parseTrainModelToGrpc(train));
+        return toReturn.build();
     }
 }

@@ -1,7 +1,6 @@
-/*
 package ar.edu.itba.pod.server;
 
-import ar.edu.itba.pod.server.exception.IllegalPlatformToggleStateException;
+import ar.edu.itba.pod.server.exception.IllegalPlatformStateException;
 import ar.edu.itba.pod.server.exception.PlatformNotFoundException;
 import com.google.rpc.Code;
 import io.grpc.*;
@@ -40,8 +39,9 @@ public class GlobalExceptionHandlerInterceptor implements ServerInterceptor {
         }
 
         private final Map<Class<? extends Throwable>, Code> errorCodesByException = Map.of(
-                IllegalPlatformToggleStateException.class, Code.FAILED_PRECONDITION,
-                PlatformNotFoundException.class, Code.NOT_FOUND
+                IllegalPlatformStateException.class, Code.FAILED_PRECONDITION,
+                PlatformNotFoundException.class, Code.NOT_FOUND,
+                Exception.class, Code.INTERNAL
         );
 
         private void handleException(RuntimeException exception, ServerCall<T, R> serverCall, Metadata headers) {
@@ -66,4 +66,4 @@ public class GlobalExceptionHandlerInterceptor implements ServerInterceptor {
         }
     }
 
-}*/
+}

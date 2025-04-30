@@ -8,12 +8,13 @@ import java.util.concurrent.*;
 import java.util.function.Consumer;
 
 public class Station {
+    private final Map<Size, SortedMap<Integer, Platform>> platforms = new EnumMap<>(Size.class);
     private final ConcurrentLinkedQueue<Train> waitingTrains = new ConcurrentLinkedQueue<>();
-    private final Map<Size, SortedMap<Integer, Platform>> platforms;
+    private final List<Train> abandonedTrains = new CopyOnWriteArrayList<>();
+    private final ConcurrentMap<Integer, List<Train>> abandonedTrainsByPlatform = new ConcurrentHashMap<>();
     private final List<Consumer<BoardView>> boardObservers = new CopyOnWriteArrayList<>();
 
     public Station() {
-        this.platforms = new EnumMap<>(Size.class);
         for (Size size : Size.values()) {
             platforms.put(size, new ConcurrentSkipListMap<>()); // These pair of references won't change
         }
@@ -43,6 +44,8 @@ public class Station {
 
     public synchronized Train addTrainOrGet(String trainId, Size trainSize, int passengers, boolean doubleTraction) {
         Train train = new Train(trainId, trainSize, doubleTraction, passengers);
+        if (abandonedTrains.contains(train))
+            throw new TrainAlreadyLeftException();
         if (waitingTrains.contains(train))
             return getWaitingTrain(trainId, trainSize, passengers, doubleTraction);
         waitingTrains.add(train);
@@ -62,6 +65,7 @@ public class Station {
         return waitingTrains.stream().filter(t -> t.getId().equals(id)).findFirst().orElseThrow(TrainNotFoundException::new);
     }
 
+    // returns the trains ahead
     public int updateWaitingTrainState(Train train) {
         synchronized (this) { // make sure the queue doesn't change
             if (!waitingTrains.contains(train))
@@ -135,6 +139,10 @@ public class Station {
         platform.departTrain(train);
         train.boardAndLeavePlatform(platform, passengers);
 
+        abandonedTrains.add(train);
+        abandonedTrainsByPlatform.computeIfAbsent(platformId, p -> new CopyOnWriteArrayList<>())
+                        .add(train);
+
         notifyBoardObservers();
         return train;
     }
@@ -173,6 +181,21 @@ public class Station {
     public void registerBoardObserver(Consumer<BoardView> observer) {
         observer.accept(buildBoardView());
         boardObservers.add(observer);
+    }
+
+    // TODO esto hacía una shallow copy o deep copy? Porque necesito los passengers del momento
+    public synchronized List<Train> getCurrentWaitingTrains () {
+        return new ArrayList<>(waitingTrains);
+    }
+
+    // TODO plantearse si conviene usar esto o mejor usar queue y sincronizar yo
+    public List<Train> getAbandonedTrains() {
+        return new ArrayList<>(abandonedTrains);
+    }
+
+    public List<Train> getAbandonedTrains(int platformId) {
+        List<Train> list = abandonedTrainsByPlatform.get(platformId);
+        return list == null ? List.of() : new ArrayList<>(list);
     }
 
 }
