@@ -1,7 +1,6 @@
 package ar.edu.itba.pod.server;
 
-import ar.edu.itba.pod.server.exception.IllegalPlatformStateException;
-import ar.edu.itba.pod.server.exception.PlatformNotFoundException;
+import ar.edu.itba.pod.server.exception.*;
 import com.google.rpc.Code;
 import io.grpc.*;
 import io.grpc.protobuf.StatusProto;
@@ -41,6 +40,10 @@ public class GlobalExceptionHandlerInterceptor implements ServerInterceptor {
         private final Map<Class<? extends Throwable>, Code> errorCodesByException = Map.of(
                 IllegalPlatformStateException.class, Code.FAILED_PRECONDITION,
                 PlatformNotFoundException.class, Code.NOT_FOUND,
+                IllegalTrainStateException.class, Code.FAILED_PRECONDITION,
+                TrainAlreadyLeftException.class, Code.ALREADY_EXISTS,
+                TrainCannotParkException.class, Code.FAILED_PRECONDITION,
+                TrainConflictException.class, Code.ALREADY_EXISTS,
                 Exception.class, Code.INTERNAL
         );
 

@@ -3,14 +3,13 @@ package ar.edu.itba.pod.server;
 import ar.edu.itba.pod.server.servant.ServantFactory;
 import io.grpc.BindableService;
 import io.grpc.ServerBuilder;
-import io.grpc.ServerInterceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
 public class Server {
-    private static Logger logger = LoggerFactory.getLogger(Server.class);
+    private static final Logger logger = LoggerFactory.getLogger(Server.class);
 
     public static void main(String[] args) throws InterruptedException, IOException {
         logger.info(" Server Starting ...");
@@ -19,7 +18,7 @@ public class Server {
         ServerBuilder<?> serverBuilder = ServerBuilder.forPort(port);
         for (BindableService bs : ServantFactory.getServants())
             serverBuilder.addService(bs);
-//        serverBuilder.intercept(new GlobalExceptionHandlerInterceptor());
+        serverBuilder.intercept(new GlobalExceptionHandlerInterceptor());
         io.grpc.Server server = serverBuilder.build();
         server.start();
         logger.info("Server started, listening on " + port);
