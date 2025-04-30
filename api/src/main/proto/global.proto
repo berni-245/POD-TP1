@@ -43,3 +43,8 @@ message Platform {
   PlatformState state = 3;
   Train train = 4;
 }
+
+message PlatformStatus {
+  Platform platform = 1;
+  string announcement = 6;
+}

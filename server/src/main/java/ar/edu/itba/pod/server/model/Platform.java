@@ -15,12 +15,14 @@ public class Platform implements Comparable<Platform> {
     private final Size platformSize;
     private PlatformState platformState;
     private Train train;
+    private String announcement;
 
     public Platform(Size platformSize) {
         this.id = currentId.getAndIncrement();
         this.platformSize = platformSize;
         this.platformState = PlatformState.IDLE;
         this.train = null;
+        this.announcement = "";
     }
 
     // returns if the train is fully park
@@ -62,6 +64,14 @@ public class Platform implements Comparable<Platform> {
             platformState = PlatformState.CLOSED;
         else
             platformState = PlatformState.IDLE;
+    }
+
+    public void setAnnouncement(String announcement) {
+        this.announcement = announcement;
+    }
+
+    public String getAnnouncement() {
+        return announcement;
     }
 
     @Override

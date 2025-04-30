@@ -107,8 +107,7 @@ public class TrainClient {
                     return;
                 }
             }
-        }
-        catch (StatusRuntimeException e) {
+        } catch (StatusRuntimeException e) {
             logger.error("RPC failed: {}", e.getStatus(), e);
         } finally {
             channel.shutdown().awaitTermination(TIMEOUT, TimeUnit.SECONDS);

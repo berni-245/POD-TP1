@@ -3,11 +3,14 @@ package ar.edu.itba.pod.server.model;
 import ar.edu.itba.pod.server.exception.*;
 
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.*;
+import java.util.function.Consumer;
 
 public class Station {
     private final ConcurrentLinkedQueue<Train> waitingTrains = new ConcurrentLinkedQueue<>();
     private final Map<Size, SortedMap<Integer, Platform>> platforms;
+    private final List<Consumer<BoardView>> boardObservers = new CopyOnWriteArrayList<>();
 
     public Station() {
         this.platforms = new EnumMap<>(Size.class);
@@ -141,4 +144,41 @@ public class Station {
         }
         return train;
     }
+
+    public Map<Size, SortedMap<Integer, Platform>> getPlatforms() {
+        Map<Size, SortedMap<Integer, Platform>> immutablePlatforms = new EnumMap<>(Size.class);
+        for (Map.Entry<Size, SortedMap<Integer, Platform>> entry : platforms.entrySet()) {
+            immutablePlatforms.put(entry.getKey(), Collections.unmodifiableSortedMap(entry.getValue()));
+        }
+        return Collections.unmodifiableMap(immutablePlatforms);
+    }
+
+    public void setAnnouncement(int platformId, String message) {
+        Platform platform = getPlatform(platformId);
+        platform.setAnnouncement(message);
+        notifyBoardObservers();
+    }
+
+    public BoardView buildBoardView() {
+        final List<Platform> views = new ArrayList<>();
+
+        for (Size size : Size.values()) {
+            views.addAll(platforms.get(size).values());
+        }
+        views.sort(Comparator.comparingInt(Platform::getId));
+        return new BoardView(views);
+    }
+
+    private void notifyBoardObservers() {
+        BoardView snapshot = buildBoardView();
+        for (Consumer<BoardView> observer : boardObservers) {
+            observer.accept(snapshot);
+        }
+    }
+
+    public void registerBoardObserver(Consumer<BoardView> observer) {
+        observer.accept(buildBoardView());
+        boardObservers.add(observer);
+    }
+
 }

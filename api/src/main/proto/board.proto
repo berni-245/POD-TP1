@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+import "global.proto";
+import "google/protobuf/empty.proto";
+
+package service;
+
+option java_package = "ar.edu.itba.pod.server";
+option java_outer_classname = "BoardAdministratorModel";
+option java_multiple_files = true;
+
+service BoardAdministrator {
+  rpc Snapshot(google.protobuf.Empty) returns (BoardSnapshot);
+  rpc LiveBoard(google.protobuf.Empty) returns (stream BoardSnapshot);
+  rpc PublishAnnouncement(AnnouncementRequest) returns (google.protobuf.Empty);
+}
+
+message BoardSnapshot {
+  repeated PlatformStatus platforms = 1;
+}
+
+message AnnouncementRequest {
+  int32 platformId = 1;
+  string message = 2;
+}

@@ -1,11 +1,8 @@
 package ar.edu.itba.pod.server.servant;
 
-import ar.edu.itba.pod.server.Global;
-import ar.edu.itba.pod.server.OccupyPlatformResponse;
-import ar.edu.itba.pod.server.RequestPlatformResponse;
-import ar.edu.itba.pod.server.TrainAndPlatformValue;
+import ar.edu.itba.pod.server.*;
+import ar.edu.itba.pod.server.model.BoardView;
 import ar.edu.itba.pod.server.model.Platform;
-import ar.edu.itba.pod.server.model.Size;
 import ar.edu.itba.pod.server.model.Train;
 
 import java.util.Optional;
@@ -63,6 +60,19 @@ public class ServantUtils {
             builder.setTrain(parseTrainModelToGrpc(train));
         if (platform != null)
             builder.setPlatform(parsePlatformModelToGrpc(platform));
+        return builder.build();
+    }
+
+    static BoardSnapshot parseToBoardSnapshot(BoardView boardView) {
+        BoardSnapshot.Builder builder = BoardSnapshot.newBuilder();
+
+        for (Platform platform : boardView.getPlatforms()) {
+            builder.addPlatforms(Global.PlatformStatus.newBuilder()
+                    .setPlatform(parsePlatformModelToGrpc(platform))
+                    .setAnnouncement(platform.getAnnouncement())
+                    .build());
+        }
+
         return builder.build();
     }
 }
