@@ -37,6 +37,7 @@ public class Station {
     public Platform togglePlatform(int id) {
         Platform platform = getPlatform(id);
         platform.toggleState();
+        notifyBoardObservers();
         return platform;
     }
 
@@ -118,7 +119,7 @@ public class Station {
             train.disembarkAllPassengers();
             waitingTrains.poll();
         }
-
+        notifyBoardObservers();
         return unloadedPassengers;
     }
 
@@ -142,6 +143,7 @@ public class Station {
 
             platform.departTrain(train);
         }
+        notifyBoardObservers();
         return train;
     }
 
