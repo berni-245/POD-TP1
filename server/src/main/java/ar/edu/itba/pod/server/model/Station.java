@@ -5,7 +5,6 @@ import ar.edu.itba.pod.server.exception.*;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.*;
-import java.util.function.Consumer;
 
 public class Station {
     private final ConcurrentLinkedQueue<Train> waitingTrains = new ConcurrentLinkedQueue<>();
@@ -108,16 +107,18 @@ public class Station {
         return 0;
     }
 
-    public synchronized int dischargeTrain(Train train, Platform platform) {
+    public int dischargeTrain(Train train, Platform platform) {
         if (train.getTrainState() != TrainState.PROCEED && train.getTrainState() != TrainState.SPLIT_AND_PROCEED)
             throw new TrainCannotParkException();
 
         int unloadedPassengers = 0;
-        boolean trainIsFullyParked = platform.parkTrain(train);
-        if (trainIsFullyParked) {
-            unloadedPassengers = train.getPassengers();
-            train.disembarkAllPassengers();
-            waitingTrains.poll();
+        synchronized (this) {
+            boolean trainIsFullyParked = platform.parkTrain(train);
+            if (trainIsFullyParked) {
+                unloadedPassengers = train.getPassengers();
+                train.disembarkAllPassengers();
+                waitingTrains.poll();
+            }
         }
         notifyBoardObservers();
         return unloadedPassengers;
@@ -125,23 +126,27 @@ public class Station {
 
     public Train loadPassengersAndLeave(String trainId, int platformId, int passengers) {
         Platform platform = getPlatform(platformId);
-        if (!platform.getPlatformState().equals(PlatformState.BUSY))
-            throw new IllegalPlatformStateException("The platform is not busy with a train");
+        Train train;
+        synchronized (platform) {
+            if (!platform.getPlatformState().equals(PlatformState.BUSY))
+                throw new IllegalPlatformStateException("The platform is not busy with a train");
 
-        Optional<Train> trainOptional = platform.getTrain();
-        if (trainOptional.isEmpty() || !trainOptional.get().getId().equals(trainId))
-            throw new TrainNotFoundException();
+            Optional<Train> trainOptional = platform.getTrain();
+            if (trainOptional.isEmpty() || !trainOptional.get().getId().equals(trainId))
+                throw new TrainNotFoundException();
 
-        Train train = trainOptional.get();
+            train = trainOptional.get();
+            platform.departTrain(train);
+        }
         synchronized (train) {
             train.boardPassengers(passengers);
 
-            if (train.getPlatform().equals(platform))
+            if (train.getPlatform().equals(platform)) {
                 train.leavePlatform();
-            else
+            }
+            else {
                 train.leaveSecondPlatform();
-
-            platform.departTrain(train);
+            }
         }
         notifyBoardObservers();
         return train;
