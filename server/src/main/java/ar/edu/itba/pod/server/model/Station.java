@@ -5,6 +5,7 @@ import ar.edu.itba.pod.server.exception.*;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.*;
+import java.util.function.Consumer;
 
 public class Station {
     private final ConcurrentLinkedQueue<Train> waitingTrains = new ConcurrentLinkedQueue<>();
