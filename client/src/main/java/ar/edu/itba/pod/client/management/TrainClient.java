@@ -47,8 +47,9 @@ public class TrainClient {
                     platformReply = stub.requestPlatform(TrainValue.newBuilder().setTrain(protoTrain).build());
 
                     if (platformReply.getTrainsAhead() > 0) {
-                        System.out.printf("\uD83D\uDE85%s (%s) (%d \uD83E\uDDCD) is waiting for platform with %d trains ahead",
+                        System.out.printf("\uD83D\uDE85%s%s (%s) (%d \uD83E\uDDCD) is waiting for platform with %d trains ahead",
                                 platformReply.getTrain().getHasDoubleTraction() ? "\uD83D\uDE85" : "",
+                                platformReply.getTrain().getId(),
                                 platformReply.getTrain().getTrainSize(),
                                 platformReply.getTrain().getOccupancyNumber(),
                                 platformReply.getTrainsAhead()
@@ -58,7 +59,7 @@ public class TrainClient {
                                 platformReply.getTrain().getHasDoubleTraction() ? "\uD83D\uDE85" : "",
                                 platformReply.getTrain().getTrainSize(),
                                 platformReply.getTrain().getOccupancyNumber(),
-                                platformReply.hasSecondPlatform() ? "proceed" : "split and proceed",
+                                platformReply.hasSecondPlatform() ? "split and proceed" : "proceed",
                                 platformReply.getPlatform().getId(),
                                 platformReply.getPlatform().getPlatformSize(),
                                 platformReply.hasSecondPlatform() ? " and \uD83D\uDE89 Platform #%d (%s)"
