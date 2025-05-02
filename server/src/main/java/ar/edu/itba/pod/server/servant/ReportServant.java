@@ -1,6 +1,7 @@
 package ar.edu.itba.pod.server.servant;
 
 import ar.edu.itba.pod.server.ReportGrpc;
+import ar.edu.itba.pod.server.TrainAndPlatformList;
 import ar.edu.itba.pod.server.TrainList;
 import ar.edu.itba.pod.server.model.Station;
 import ar.edu.itba.pod.server.model.Train;
@@ -25,7 +26,7 @@ public class ReportServant extends ReportGrpc.ReportImplBase {
     }
 
     @Override
-    public void getAbandonedTrains(Int32Value request, StreamObserver<TrainList> responseObserver) {
+    public void getAbandonedTrains(Int32Value request, StreamObserver<TrainAndPlatformList> responseObserver) {
         List<Train> abandonedTrains;
         if (request.getValue() <= 0) {
             abandonedTrains = station.getAbandonedTrains();
@@ -33,7 +34,7 @@ public class ReportServant extends ReportGrpc.ReportImplBase {
         else {
             abandonedTrains = station.getAbandonedTrains(request.getValue());
         }
-        responseObserver.onNext(ServantUtils.TrainListModelToGrpc(abandonedTrains));
+        responseObserver.onNext(ServantUtils.TrainListModelToTrainAndPlatformList(abandonedTrains));
         responseObserver.onCompleted();
     }
 }

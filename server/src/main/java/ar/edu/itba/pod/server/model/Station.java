@@ -95,8 +95,7 @@ public class Station {
             Platform firstPlatform = null;
             Size size = Size.fromOrdinal(train.getTrainSize().ordinal() - 1);
             for (Platform platform : platforms.get(size).values()) {
-                // TODO preguntar si tiene sentido asegurarse que sea IDLE durante toda la iteración, para mí que no
-                // TODO ya que, incluso pasado este método, se podrán seguir cerrando las estaciones
+                // TODO TE LA COMPLICASTE BERNI, una vez asignada la primera vez, no hace falta volver a hacerlo
                 if (!platform.getPlatformState().equals(PlatformState.IDLE)) {
                     continue;
                 }
@@ -183,12 +182,13 @@ public class Station {
         boardObservers.add(observer);
     }
 
-    // TODO esto hacía una shallow copy o deep copy? Porque necesito los passengers del momento
     public synchronized List<Train> getCurrentWaitingTrains () {
-        return new ArrayList<>(waitingTrains);
+        List<Train> toReturn = new ArrayList<>();
+        for (Train train : waitingTrains)
+            toReturn.add(new Train(train.getId(), train.getTrainSize(), train.isDoubleTraction(), train.getPassengers()));
+        return toReturn;
     }
 
-    // TODO plantearse si conviene usar esto o mejor usar queue y sincronizar yo
     public List<Train> getAbandonedTrains() {
         return new ArrayList<>(abandonedTrains);
     }

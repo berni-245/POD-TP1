@@ -18,11 +18,6 @@ message TrainValue {
   Train train = 1;
 }
 
-message TrainAndPlatformValue {
-  Train train = 1;
-  Platform platform = 2;
-}
-
 message TrainAndPlatformAndOccupancy {
   Train train = 1;
   Platform platform = 2;

@@ -12,9 +12,13 @@ option java_multiple_files = true;
 
 service Report {
   rpc getWaitingTrains(google.protobuf.Empty) returns (TrainList);
-  rpc getAbandonedTrains(google.protobuf.Int32Value) returns (TrainList);
+  rpc getAbandonedTrains(google.protobuf.Int32Value) returns (TrainAndPlatformList);
 }
 
 message TrainList {
   repeated Train train_list = 1;
+}
+
+message TrainAndPlatformList {
+  repeated TrainAndPlatformValue train_and_platform_list = 1;
 }

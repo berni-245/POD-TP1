@@ -71,7 +71,7 @@ public class TrainClient {
                     OccupyPlatformResponse platformReply;
                     Global.Train protoTrain = Global.Train.newBuilder().setId(trainId).build();
                     Global.Platform protoPlatform = Global.Platform.newBuilder().setId(Integer.parseInt(platform)).build();
-                    TrainAndPlatformValue trainAndPlatform = TrainAndPlatformValue.newBuilder().setTrain(protoTrain).setPlatform(protoPlatform).build();
+                    Global.TrainAndPlatformValue trainAndPlatform = Global.TrainAndPlatformValue.newBuilder().setTrain(protoTrain).setPlatform(protoPlatform).build();
                     platformReply = stub.occupyPlatform(trainAndPlatform);
 
                     System.out.printf("\uD83D\uDE85%s (%s) unloaded %d\uD83E\uDDCDin \uD83D\uDE89Platform #%d (%s)",
@@ -83,7 +83,7 @@ public class TrainClient {
                     );
                 }
                 case "depart" -> {
-                    TrainAndPlatformValue trainAndPlatformReply;
+                    Global.TrainAndPlatformValue trainAndPlatformReply;
                     Global.Train protoTrain = Global.Train.newBuilder().setId(trainId).build();
                     Global.Platform protoPlatform = Global.Platform.newBuilder().setId(Integer.parseInt(platform)).build();
                     TrainAndPlatformAndOccupancy trainAndPlatformAndOccupancy = TrainAndPlatformAndOccupancy.newBuilder()

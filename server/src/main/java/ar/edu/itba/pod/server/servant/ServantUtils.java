@@ -55,8 +55,8 @@ public class ServantUtils {
         return builder.build();
     }
 
-    static TrainAndPlatformValue parseToTrainAndPlatformValue(Train train, Platform platform) {
-        TrainAndPlatformValue.Builder builder = TrainAndPlatformValue.newBuilder();
+    static Global.TrainAndPlatformValue parseToTrainAndPlatformValue(Train train, Platform platform) {
+        Global.TrainAndPlatformValue.Builder builder = Global.TrainAndPlatformValue.newBuilder();
         if (train != null)
             builder.setTrain(parseTrainModelToGrpc(train));
         if (platform != null)
@@ -80,7 +80,18 @@ public class ServantUtils {
     static TrainList TrainListModelToGrpc(List<Train> trainList) {
         TrainList.Builder toReturn = TrainList.newBuilder();
         for (Train train : trainList)
-            toReturn.addTrainList(ServantUtils.parseTrainModelToGrpc(train));
+            toReturn.addTrainList(
+                    ServantUtils.parseTrainModelToGrpc(train)
+            );
+        return toReturn.build();
+    }
+
+    static TrainAndPlatformList TrainListModelToTrainAndPlatformList(List<Train> trainList) {
+        TrainAndPlatformList.Builder toReturn = TrainAndPlatformList.newBuilder();
+        for (Train train : trainList)
+            toReturn.addTrainAndPlatformList(
+                    ServantUtils.parseToTrainAndPlatformValue(train, train.getPlatform())
+            );
         return toReturn.build();
     }
 }

@@ -36,7 +36,7 @@ public class TrainAdministratorServant extends TrainAdministratorGrpc.TrainAdmin
     }
 
     @Override
-    public void occupyPlatform(TrainAndPlatformValue request, StreamObserver<OccupyPlatformResponse> responseObserver) {
+    public void occupyPlatform(Global.TrainAndPlatformValue request, StreamObserver<OccupyPlatformResponse> responseObserver) {
         Global.Train requestTrain = request.getTrain();
         Global.Platform requestPlatform = request.getPlatform();
         Train train = station.findWaitingTrainByIdOrThrow(requestTrain.getId());
@@ -49,7 +49,7 @@ public class TrainAdministratorServant extends TrainAdministratorGrpc.TrainAdmin
     }
 
     @Override
-    public void leavePlatform(TrainAndPlatformAndOccupancy request, StreamObserver<TrainAndPlatformValue> responseObserver) {
+    public void leavePlatform(TrainAndPlatformAndOccupancy request, StreamObserver<Global.TrainAndPlatformValue> responseObserver) {
         Train train = station.loadPassengersAndLeave(request.getTrain().getId(), request.getPlatform().getId(), request.getOccupancy());
         responseObserver.onNext(
                 ServantUtils.parseToTrainAndPlatformValue(train, station.getPlatform(request.getPlatform().getId()))

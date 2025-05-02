@@ -44,6 +44,11 @@ message Platform {
   Train train = 4;
 }
 
+message TrainAndPlatformValue {
+  Train train = 1;
+  Platform platform = 2;
+}
+
 message PlatformStatus {
   Platform platform = 1;
   string announcement = 6;
