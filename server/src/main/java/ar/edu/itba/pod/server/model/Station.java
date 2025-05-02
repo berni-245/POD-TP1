@@ -83,37 +83,32 @@ public class Station {
             }
         }
 
-        synchronized (train) {
-            if (train.getPlatform() != null)
-                return trainsAhead;
-
-            for (Size size : Size.valuesFromSize(train.getTrainSize())) {
-                for (Platform platform : platforms.get(size).values()) {
-                    synchronized (platform) {
-                        if (platform.getPlatformState().equals(PlatformState.IDLE)) {
-                            train.associatePlatform(platform);
-                            return trainsAhead;
-                        }
+        for (Size size : Size.valuesFromSize(train.getTrainSize())) {
+            for (Platform platform : platforms.get(size).values()) {
+                synchronized (platform) {
+                    if (platform.getPlatformState().equals(PlatformState.IDLE)) {
+                        train.associatePlatform(platform);
+                        return trainsAhead;
                     }
                 }
             }
+        }
 
-            if (train.canSplitIntoTwo()) {
-                Platform firstPlatform = null;
-                Size size = Size.fromOrdinal(train.getTrainSize().ordinal() - 1);
-                for (Platform platform : platforms.get(size).values()) {
-                    synchronized (platform) {
-                        if (!platform.getPlatformState().equals(PlatformState.IDLE)) {
-                            continue;
-                        }
-                        if (firstPlatform == null)
-                            firstPlatform = platform;
+        if (train.canSplitIntoTwo()) {
+            Platform firstPlatform = null;
+            Size size = Size.fromOrdinal(train.getTrainSize().ordinal() - 1);
+            for (Platform platform : platforms.get(size).values()) {
+                synchronized (platform) {
+                    if (!platform.getPlatformState().equals(PlatformState.IDLE)) {
+                        continue;
+                    }
+                    if (firstPlatform == null)
+                        firstPlatform = platform;
 
-                        else {
-                            synchronized (firstPlatform) {
-                                train.associateTwoPlatforms(firstPlatform, platform);
-                                return trainsAhead;
-                            }
+                    else {
+                        synchronized (firstPlatform) {
+                            train.associateTwoPlatforms(firstPlatform, platform);
+                            return trainsAhead;
                         }
                     }
                 }

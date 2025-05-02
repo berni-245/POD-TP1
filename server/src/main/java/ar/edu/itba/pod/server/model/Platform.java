@@ -87,7 +87,7 @@ public class Platform implements Comparable<Platform> {
         return platformSize;
     }
 
-    public synchronized PlatformState getPlatformState() {
+    public PlatformState getPlatformState() {
         return platformState;
     }
 
