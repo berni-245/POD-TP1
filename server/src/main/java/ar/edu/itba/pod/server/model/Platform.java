@@ -27,9 +27,6 @@ public class Platform implements Comparable<Platform> {
         if (!platformState.equals(PlatformState.IDLE))
             throw new IllegalPlatformStateException("Platform is not free and open for parking");
 
-        if (!train.getPlatform().equals(this) && !train.getSecondPlatform().equals(this))
-            throw new IllegalPlatformStateException("The train is not allowed to park in this platform");
-
         this.train = train;
         platformState = PlatformState.BUSY;
     }

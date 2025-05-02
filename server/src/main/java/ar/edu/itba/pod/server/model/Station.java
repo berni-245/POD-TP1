@@ -65,50 +65,59 @@ public class Station {
         return waitingTrains.stream().filter(t -> t.getId().equals(id)).findFirst().orElseThrow(TrainNotFoundException::new);
     }
 
-    // returns the trains ahead
     public int updateWaitingTrainState(Train train) {
+        int trainsAhead = 0;
         synchronized (this) { // make sure the queue doesn't change
-            if (!waitingTrains.contains(train))
+            if (train == null || !waitingTrains.contains(train))
                 throw new TrainNotFoundException();
 
             if (!waitingTrains.peek().equals(train)) {
-                int ahead = 0;
                 for (Train t : waitingTrains) {
                     if (t.equals(train))
                         break;
-                    ahead++;
+                    trainsAhead++;
                 }
-                return ahead;
+                return trainsAhead;
             }
         }
 
-        for (Size size : Size.valuesFromSize(train.getTrainSize())) {
-            for (Platform platform : platforms.get(size).values()) {
-                if (platform.getPlatformState().equals(PlatformState.IDLE)) {
-                    train.associatePlatform(platform);
-                    return 0;
+        synchronized (train) {
+            if (train.getPlatform() != null)
+                return trainsAhead;
+
+            for (Size size : Size.valuesFromSize(train.getTrainSize())) {
+                for (Platform platform : platforms.get(size).values()) {
+                    synchronized (platform) {
+                        if (platform.getPlatformState().equals(PlatformState.IDLE)) {
+                            train.associatePlatform(platform);
+                            return trainsAhead;
+                        }
+                    }
+                }
+            }
+
+            if (train.canSplitIntoTwo()) {
+                Platform firstPlatform = null;
+                Size size = Size.fromOrdinal(train.getTrainSize().ordinal() - 1);
+                for (Platform platform : platforms.get(size).values()) {
+                    synchronized (platform) {
+                        if (!platform.getPlatformState().equals(PlatformState.IDLE)) {
+                            continue;
+                        }
+                        if (firstPlatform == null)
+                            firstPlatform = platform;
+
+                        else {
+                            synchronized (firstPlatform) {
+                                train.associateTwoPlatforms(firstPlatform, platform);
+                                return trainsAhead;
+                            }
+                        }
+                    }
                 }
             }
         }
-
-        if (train.canSplitIntoTwo()) {
-            Platform firstPlatform = null;
-            Size size = Size.fromOrdinal(train.getTrainSize().ordinal() - 1);
-            for (Platform platform : platforms.get(size).values()) {
-                // TODO TE LA COMPLICASTE BERNI, una vez asignada la primera vez, no hace falta volver a hacerlo
-                if (!platform.getPlatformState().equals(PlatformState.IDLE)) {
-                    continue;
-                }
-                if (firstPlatform == null)
-                    firstPlatform = platform;
-
-                else {
-                    train.associateTwoPlatforms(firstPlatform, platform);
-                    return 0;
-                }
-            }
-        }
-        return 0;
+        return trainsAhead;
     }
 
     public int dischargeTrain(Train train, Platform platform) {
@@ -197,5 +206,4 @@ public class Station {
         List<Train> list = abandonedTrainsByPlatform.get(platformId);
         return list == null ? List.of() : new ArrayList<>(list);
     }
-
 }
