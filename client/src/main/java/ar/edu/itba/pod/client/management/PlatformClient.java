@@ -1,5 +1,6 @@
 package ar.edu.itba.pod.client.management;
 
+import ar.edu.itba.pod.client.ClientUtils;
 import ar.edu.itba.pod.server.Global;
 import ar.edu.itba.pod.server.PlatformAdministratorGrpc;
 import ar.edu.itba.pod.server.PlatformSize;
@@ -41,7 +42,7 @@ public class PlatformClient {
                         return;
                     }
                     platformReply = stub.addPlatform(PlatformSize.newBuilder().setPlatformSize(protoSize).build());
-                    System.out.printf("\uD83D\uDE89 Platform #%d (%s) added", platformReply.getId(), platformReply.getPlatformSize());
+                    System.out.printf("%s added\n", ClientUtils.platformToString(platformReply));
                 }
                 case "status" -> {
                     if (platform == null) {
@@ -49,7 +50,10 @@ public class PlatformClient {
                         return;
                     }
                     platformReply = stub.checkState(com.google.protobuf.Int32Value.newBuilder().setValue(Integer.parseInt(platform)).build());
-                    System.out.printf("\uD83D\uDE89 Platform #%d (%s) is %s", platformReply.getId(), platformReply.getPlatformSize(), platformReply.getState());
+                    System.out.printf("%s is %s\n",
+                            ClientUtils.platformToString(platformReply),
+                            ClientUtils.platformStateToString(platformReply.getState())
+                    );
                 }
                 case "toggle" -> {
                     if (platform == null) {
@@ -57,7 +61,10 @@ public class PlatformClient {
                         return;
                     }
                     platformReply = stub.toggleState(com.google.protobuf.Int32Value.newBuilder().setValue(Integer.parseInt(platform)).build());
-                    System.out.printf("\uD83D\uDE89 Platform #%d (%s) is %s", platformReply.getId(), platformReply.getPlatformSize(), platformReply.getState());
+                    System.out.printf("%s is %s\n",
+                            ClientUtils.platformToString(platformReply),
+                            ClientUtils.platformStateToString(platformReply.getState())
+                    );
                 }
                 default -> {
                     logger.error("Invalid action (Platform Client)");

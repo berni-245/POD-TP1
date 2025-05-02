@@ -1,5 +1,6 @@
 package ar.edu.itba.pod.client.operations;
 
+import ar.edu.itba.pod.client.ClientUtils;
 import ar.edu.itba.pod.server.Global;
 import ar.edu.itba.pod.server.ReportGrpc;
 import ar.edu.itba.pod.server.TrainList;
@@ -22,25 +23,18 @@ public class ReportClient {
 
     private static final Logger logger = LoggerFactory.getLogger(ReportClient.class);
     private static final int TIMEOUT = 30;
-    private static final Function<Global.Train, String> WAITING_TRAIN_TO_STRING =
-            train -> "\uD83D\uDE85%s%s (%s) (%d\uD83E\uDDCD)\n".
-                    formatted(
-                            train.getHasDoubleTraction()? "\uD83D\uDE85" : "",
-                            train.getId(),
-                            train.getTrainSize(),
-                            train.getOccupancyNumber()
-                    );
-    private static final Function<Global.TrainAndPlatformValue, String> ABANDONED_TRAIN_TO_TRAIN =
-            trainAndPlatform -> "\uD83D\uDE85%s%s (%s) left \uD83D\uDE89 Platform #%d (%s) after loading %d\uD83E\uDDCD".
-                    formatted(
-                            trainAndPlatform.getTrain().getHasDoubleTraction()? "\uD83D\uDE85" : "",
-                            trainAndPlatform.getTrain().getId(),
-                            trainAndPlatform.getTrain().getTrainSize(),
-                            trainAndPlatform.getPlatform().getId(),
-                            trainAndPlatform.getPlatform().getPlatformSizeValue(),
-                            trainAndPlatform.getTrain().getOccupancyNumber()
-                    );
 
+    private static final Function<Global.Train, String> WAITING_TRAIN_TO_STRING =
+            train -> "%s\n".formatted(
+                    ClientUtils.trainWithOccupancyToString(train)
+            );
+
+    private static final Function<Global.TrainAndPlatformValue, String> ABANDONED_TRAIN_TO_TRAIN =
+            trainAndPlatform -> "%s left %s after loading %s\n".formatted(
+                            ClientUtils.trainToString(trainAndPlatform.getTrain()),
+                            ClientUtils.platformToString(trainAndPlatform.getPlatform()),
+                            ClientUtils.occupancyToString(trainAndPlatform.getTrain().getOccupancyNumber())
+            );
 
     public static void main(String[] args) throws InterruptedException, IOException {
 

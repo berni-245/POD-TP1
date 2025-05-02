@@ -1,5 +1,6 @@
 package ar.edu.itba.pod.client.management;
 
+import ar.edu.itba.pod.client.ClientUtils;
 import ar.edu.itba.pod.server.*;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
@@ -46,24 +47,19 @@ public class TrainClient {
                             .build();
                     platformReply = stub.requestPlatform(TrainValue.newBuilder().setTrain(protoTrain).build());
 
-                    if (platformReply.getTrainsAhead() > 0) {
-                        System.out.printf("\uD83D\uDE85%s%s (%s) (%d \uD83E\uDDCD) is waiting for platform with %d trains ahead",
-                                platformReply.getTrain().getHasDoubleTraction() ? "\uD83D\uDE85" : "",
-                                platformReply.getTrain().getId(),
-                                platformReply.getTrain().getTrainSize(),
-                                platformReply.getTrain().getOccupancyNumber(),
+                    if (platformReply.getTrain().getTrainState().equals(Global.TrainState.TRAIN_STATE_WAITING)) {
+                        System.out.printf("%s is waiting for platform with %d trains ahead\n",
+                                ClientUtils.trainWithOccupancyToString(platformReply.getTrain()),
                                 platformReply.getTrainsAhead()
                         );
                     } else {
-                        System.out.printf("\uD83D\uDE85%s (%s) (%d \uD83E\uDDCD) %s to \uD83D\uDE89 Platform #%d (%s) %s",
-                                platformReply.getTrain().getHasDoubleTraction() ? "\uD83D\uDE85" : "",
-                                platformReply.getTrain().getTrainSize(),
-                                platformReply.getTrain().getOccupancyNumber(),
+                        System.out.printf("%s %s to %s %s\n",
+                                ClientUtils.trainWithOccupancyToString(platformReply.getTrain()),
                                 platformReply.hasSecondPlatform() ? "split and proceed" : "proceed",
-                                platformReply.getPlatform().getId(),
-                                platformReply.getPlatform().getPlatformSize(),
-                                platformReply.hasSecondPlatform() ? " and \uD83D\uDE89 Platform #%d (%s)"
-                                        .formatted(platformReply.getSecondPlatform().getId(), platformReply.getSecondPlatform().getPlatformSize()) : ""
+                                ClientUtils.platformToString(platformReply.getPlatform()),
+                                platformReply.hasSecondPlatform() ? " and %s".formatted(
+                                        ClientUtils.platformToString(platformReply.getSecondPlatform())
+                                ) : ""
                         );
                     }
                 }
@@ -74,12 +70,10 @@ public class TrainClient {
                     Global.TrainAndPlatformValue trainAndPlatform = Global.TrainAndPlatformValue.newBuilder().setTrain(protoTrain).setPlatform(protoPlatform).build();
                     platformReply = stub.occupyPlatform(trainAndPlatform);
 
-                    System.out.printf("\uD83D\uDE85%s (%s) unloaded %d\uD83E\uDDCDin \uD83D\uDE89Platform #%d (%s)",
-                            platformReply.getTrain().getHasDoubleTraction() ? "\uD83D\uDE85" : "",
-                            platformReply.getTrain().getTrainSize(),
-                            platformReply.getPreviousOccupancy(),
-                            platformReply.getPlatform().getId(),
-                            platformReply.getPlatform().getPlatformSize()
+                    System.out.printf("%s unloaded %s in %s",
+                            ClientUtils.trainToString(platformReply.getTrain()),
+                            ClientUtils.occupancyToString(platformReply.getPreviousOccupancy()),
+                            ClientUtils.platformToString(platformReply.getPlatform())
                     );
                 }
                 case "depart" -> {
@@ -93,12 +87,10 @@ public class TrainClient {
                             .build();
                     trainAndPlatformReply = stub.leavePlatform(trainAndPlatformAndOccupancy);
 
-                    System.out.printf("\uD83D\uDE85%s (%s) %s \uD83D\uDE89 Platform #%d (%s)%s",
-                            trainAndPlatformReply.getTrain().getHasDoubleTraction() ? "\uD83D\uDE85" : "",
-                            trainAndPlatformReply.getTrain().getTrainSize(),
+                    System.out.printf("%s %s %s%s", // TODO check output format here
+                            ClientUtils.trainToString(trainAndPlatformReply.getTrain()),
                             trainAndPlatformReply.getTrain().getTrainState(),
-                            trainAndPlatformReply.getPlatform().getId(),
-                            trainAndPlatformReply.getPlatform().getPlatformSize(),
+                            ClientUtils.platformToString(trainAndPlatformReply.getPlatform()),
                             trainAndPlatformReply.getTrain().getTrainState().equals(Global.TrainState.TRAIN_STATE_READY_TO_LEAVE) ?
                                     "" : " after loading %d \uD83E\uDDCD".formatted(trainAndPlatformReply.getTrain().getOccupancyNumber())
                     );
