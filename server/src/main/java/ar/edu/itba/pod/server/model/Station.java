@@ -65,6 +65,8 @@ public class Station {
         return waitingTrains.stream().filter(t -> t.getId().equals(id)).findFirst().orElseThrow(TrainNotFoundException::new);
     }
 
+    // The local variables are always obtained from references stored in memory, so they work for consistent state within the same instance
+    @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
     public int updateWaitingTrainState(Train train) {
         int trainsAhead = 0;
         synchronized (this) { // make sure the queue doesn't change
