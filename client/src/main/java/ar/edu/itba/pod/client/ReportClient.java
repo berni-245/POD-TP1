@@ -1,9 +1,7 @@
-package ar.edu.itba.pod.client.operations;
+package ar.edu.itba.pod.client;
 
-import ar.edu.itba.pod.client.ClientUtils;
 import ar.edu.itba.pod.server.Global;
 import ar.edu.itba.pod.server.ReportGrpc;
-import ar.edu.itba.pod.server.TrainList;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Int32Value;
 import io.grpc.ManagedChannel;
@@ -29,7 +27,7 @@ public class ReportClient {
                     ClientUtils.trainWithOccupancyToString(train)
             );
 
-    private static final Function<Global.TrainAndPlatformValue, String> ABANDONED_TRAIN_TO_TRAIN =
+    private static final Function<Global.TrainAndPlatformValue, String> ABANDONED_TRAIN_TO_STRING =
             trainAndPlatform -> "%s left %s after loading %s\n".formatted(
                             ClientUtils.trainToString(trainAndPlatform.getTrain()),
                             ClientUtils.platformToString(trainAndPlatform.getPlatform()),
@@ -72,7 +70,7 @@ public class ReportClient {
                     ).getTrainAndPlatformListList();
                     if (trains.isEmpty())
                         return;
-                    var report = buildReportFromList(trains, ABANDONED_TRAIN_TO_TRAIN);
+                    var report = buildReportFromList(trains, ABANDONED_TRAIN_TO_STRING);
                     Files.write(path, report.getBytes());
                 }
             }

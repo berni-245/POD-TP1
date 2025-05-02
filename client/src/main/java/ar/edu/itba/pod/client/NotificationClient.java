@@ -1,4 +1,4 @@
-package ar.edu.itba.pod.client.operations;
+package ar.edu.itba.pod.client;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

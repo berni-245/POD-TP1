@@ -1,6 +1,5 @@
-package ar.edu.itba.pod.client.management;
+package ar.edu.itba.pod.client;
 
-import ar.edu.itba.pod.client.ClientUtils;
 import ar.edu.itba.pod.server.Global;
 import ar.edu.itba.pod.server.PlatformAdministratorGrpc;
 import ar.edu.itba.pod.server.PlatformSize;

@@ -1,4 +1,4 @@
-package ar.edu.itba.pod.client.operations;
+package ar.edu.itba.pod.client;
 
 import ar.edu.itba.pod.server.AnnouncementRequest;
 import ar.edu.itba.pod.server.BoardAdministratorGrpc;

@@ -3,7 +3,7 @@ package ar.edu.itba.pod.client;
 import ar.edu.itba.pod.server.Global;
 
 public class ClientUtils {
-    public static String sizeToString(Global.Size size) {
+    static String sizeToString(Global.Size size) {
         switch (size) {
             case SIZE_SMALL -> {
                 return "S";
@@ -18,7 +18,7 @@ public class ClientUtils {
         return "SIZE UNDEFINED"; // Should never happen
     }
 
-    public static String platformStateToString(Global.PlatformState state) {
+    static String platformStateToString(Global.PlatformState state) {
         switch (state) {
             case PLATFORM_STATE_IDLE -> {
                 return "IDLE";
@@ -33,7 +33,7 @@ public class ClientUtils {
         return "STATE UNDEFINED"; // Should never happen
     }
 
-    public static String trainToString(Global.Train train) {
+    static String trainToString(Global.Train train) {
         return "\uD83D\uDE85%s%s (%s)".formatted(
                 train.getHasDoubleTraction()?"\uD83D\uDE85":"",
                 train.getId(),
@@ -41,18 +41,18 @@ public class ClientUtils {
         );
     }
 
-    public static String occupancyToString(int occupancy) {
+    static String occupancyToString(int occupancy) {
         return "%d\uD83E\uDDCD".formatted(occupancy);
     }
 
-    public static String trainWithOccupancyToString(Global.Train train) {
+    static String trainWithOccupancyToString(Global.Train train) {
         return "%s (%s)".formatted(
                 trainToString(train),
                 occupancyToString(train.getOccupancyNumber())
         );
     }
 
-    public static String platformToString(Global.Platform platform) {
+    static String platformToString(Global.Platform platform) {
         return "\uD83D\uDE89 Platform #%d (%s)".formatted(
                 platform.getId(),
                 sizeToString(platform.getPlatformSize())
