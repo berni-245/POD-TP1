@@ -1,5 +1,6 @@
 package ar.edu.itba.pod.client.operations;
 
+import ar.edu.itba.pod.server.AnnouncementRequest;
 import ar.edu.itba.pod.server.BoardAdministratorGrpc;
 import ar.edu.itba.pod.server.BoardSnapshot;
 import ar.edu.itba.pod.server.Global;
@@ -40,9 +41,10 @@ public class BoardClient {
                     BoardSnapshot snapshot = blockingStub.snapshot(Empty.newBuilder().build());
                     printSnapshot(snapshot);
                 }
-                case "live" -> { // TODO: Todavia no se pueden enviar anuncios.. creo q deberia hacer flujo bidireccional...
+                case "live" -> {
                     CountDownLatch finishLatch = new CountDownLatch(1);
-                    StreamObserver<BoardSnapshot> observer = new StreamObserver<>() {
+
+                    StreamObserver<BoardSnapshot> responseObserver = new StreamObserver<>() {
                         @Override
                         public void onNext(BoardSnapshot snapshot) {
                             System.out.println("### LIVE BOARD ###");
@@ -51,8 +53,8 @@ public class BoardClient {
                         }
 
                         @Override
-                        public void onError(Throwable t) {
-                            logger.error("Live stream error: {}", t.getMessage(), t);
+                        public void onError(Throwable throwable) {
+                            logger.error("Live stream error: {}", throwable.getMessage(), throwable);
                             finishLatch.countDown();
                         }
 
@@ -63,10 +65,37 @@ public class BoardClient {
                         }
                     };
 
-                    asyncStub.liveBoard(Empty.getDefaultInstance(), observer);
+                    StreamObserver<AnnouncementRequest> requestObserver = asyncStub.liveBoard(responseObserver);
+
+                    new Thread(() -> {
+                        Scanner scanner = new Scanner(System.in);
+
+                        while (true) {
+                            if (!scanner.hasNextLine()) break;
+                            String input = scanner.nextLine().trim();
+                            if (input.equalsIgnoreCase("exit")) break;
+
+                            String[] parts = input.split(" ", 2);
+                            if (parts.length != 2) {
+                                System.out.println("Invalid input: <number> <message>");
+                                continue;
+                            }
+                            int platformId = Integer.parseInt(parts[0]);
+                            String message = parts[1];
+
+                            AnnouncementRequest request = AnnouncementRequest.newBuilder()
+                                    .setPlatformId(platformId)
+                                    .setMessage(message)
+                                    .build();
+
+                            requestObserver.onNext(request);
+                        }
+                        requestObserver.onCompleted();
+
+                    }).start();
+
                     finishLatch.await();
                 }
-
                 default -> logger.error("Invalid action (Board Client)");
             }
 

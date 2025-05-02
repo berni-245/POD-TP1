@@ -19,26 +19,38 @@ public class BoardAdministratorServant extends BoardAdministratorGrpc.BoardAdmin
 
     @Override
     public void snapshot(Empty request, StreamObserver<BoardSnapshot> responseObserver) {
-        BoardSnapshot snapshot = ServantUtils.parseToBoardSnapshot(station.buildBoardView());;
+        BoardSnapshot snapshot = ServantUtils.parseToBoardSnapshot(station.buildBoardView());
         responseObserver.onNext(snapshot);
         responseObserver.onCompleted();
     }
 
     @Override
-    public void liveBoard(Empty request, StreamObserver<BoardSnapshot> responseObserver) {
+    public StreamObserver<AnnouncementRequest> liveBoard(StreamObserver<BoardSnapshot> responseObserver) {
         Consumer<BoardView> observer = boardView -> {
             BoardSnapshot snapshot = ServantUtils.parseToBoardSnapshot(boardView);
             responseObserver.onNext(snapshot);
         };
-        station.registerBoardObserver(observer);
-    }
 
-    @Override
-    public void publishAnnouncement(AnnouncementRequest request, StreamObserver<Empty> responseObserver) {
-        int platformId = request.getPlatformId();
-        String message = request.getMessage();
-        station.setAnnouncement(platformId, message);
-        responseObserver.onNext(Empty.getDefaultInstance());
-        responseObserver.onCompleted();
+        station.registerBoardObserver(observer);
+
+        return new StreamObserver<>() {
+            @Override
+            public void onNext(AnnouncementRequest request) {
+                int platformId = request.getPlatformId();
+                String message = request.getMessage();
+                station.setAnnouncement(platformId, message);
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                station.unregisterBoardObserver(observer);
+            }
+
+            @Override
+            public void onCompleted() {
+                station.unregisterBoardObserver(observer);
+                responseObserver.onCompleted();
+            }
+        };
     }
 }

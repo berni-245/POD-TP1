@@ -193,6 +193,10 @@ public class Station {
         boardObservers.add(observer);
     }
 
+    public void unregisterBoardObserver(Consumer<BoardView> observer) {
+        boardObservers.remove(observer);
+    }
+
     public synchronized List<Train> getCurrentWaitingTrains () {
         List<Train> toReturn = new ArrayList<>();
         for (Train train : waitingTrains)

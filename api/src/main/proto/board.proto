@@ -11,8 +11,7 @@ option java_multiple_files = true;
 
 service BoardAdministrator {
   rpc Snapshot(google.protobuf.Empty) returns (BoardSnapshot);
-  rpc LiveBoard(google.protobuf.Empty) returns (stream BoardSnapshot);
-  rpc PublishAnnouncement(AnnouncementRequest) returns (google.protobuf.Empty);
+  rpc LiveBoard(stream AnnouncementRequest) returns (stream BoardSnapshot);
 }
 
 message BoardSnapshot {
