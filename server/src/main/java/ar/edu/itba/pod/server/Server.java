@@ -14,7 +14,20 @@ public class Server {
     public static void main(String[] args) throws InterruptedException, IOException {
         logger.info(" Server Starting ...");
 
-        int port = 50051;
+        final String portArg = System.getProperty("port");
+        int port;
+        if (portArg == null) {
+            port = 50051;
+        }
+        else {
+            try {
+                port = Integer.parseInt(portArg);
+            } catch (Exception e) {
+                System.err.println("Invalid type for port");
+                return;
+            }
+        }
+
         ServerBuilder<?> serverBuilder = ServerBuilder.forPort(port);
         for (BindableService bs : ServantFactory.getServants())
             serverBuilder.addService(bs);

@@ -1,1 +1,5 @@
-# pod-tp1
+# Programación de Objetos Distribuidos: TP1 - Estación de Trenes
+
+## Introducción
+
+lorem ipsum
