@@ -35,6 +35,7 @@ message Train {
   int32 occupancy_number = 3;
   bool has_double_traction = 4;
   TrainState train_state = 5;
+  int32 previous_occupancy = 6;
 }
 
 message Platform {

@@ -10,6 +10,7 @@ public class Train {
     private final String id;
     private final Size trainSize;
     private int passengers;
+    private int disembarkedPassengers = 0;
     private final boolean doubleTraction;
     private TrainState trainState;
     private Platform platform;
@@ -78,9 +79,9 @@ public class Train {
             trainState = TrainState.IN_PLATFORM_DIVIDED;
         else
             trainState = TrainState.IN_PLATFORM;
-        int toReturn = passengers;
+        this.disembarkedPassengers = passengers;
         this.passengers = 0;
-        return toReturn;
+        return disembarkedPassengers;
     }
 
     public synchronized void boardAndLeavePlatform(Platform platform, int passengers) {
@@ -140,6 +141,10 @@ public class Train {
 
     public synchronized int getPassengers() {
         return passengers;
+    }
+
+    public synchronized  int getDisembarkedPassengers() {
+        return disembarkedPassengers;
     }
 
     public synchronized TrainState getTrainState() {

@@ -18,6 +18,7 @@ public class ServantUtils {
                     .setOccupancyNumber(train.getPassengers())
                     .setHasDoubleTraction(train.isDoubleTraction())
                     .setTrainStateValue(train.getTrainState().ordinal() + 1)
+                    .setPreviousOccupancy(train.getDisembarkedPassengers())
                     .build();
         }
     }

@@ -49,10 +49,19 @@ public class PlatformClient {
                         return;
                     }
                     platformReply = stub.checkState(com.google.protobuf.Int32Value.newBuilder().setValue(Integer.parseInt(platform)).build());
-                    System.out.printf("%s is %s\n",
-                            ClientUtils.platformToString(platformReply),
-                            ClientUtils.platformStateToString(platformReply.getState())
-                    );
+                    if (!platformReply.hasTrain()) {
+                        System.out.printf("%s is %s\n",
+                                ClientUtils.platformToString(platformReply),
+                                ClientUtils.platformStateToString(platformReply.getState())
+                        );
+                    }
+                    else {
+                        System.out.printf("%s unloaded %s in %s\n",
+                                ClientUtils.trainToString(platformReply.getTrain()),
+                                ClientUtils.occupancyToString(platformReply.getTrain().getPreviousOccupancy()),
+                                ClientUtils.platformToString(platformReply)
+                        );
+                    }
                 }
                 case "toggle" -> {
                     if (platform == null) {
