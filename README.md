@@ -55,7 +55,7 @@ Una vez ahí, corremos el comando:
 ```shell 
 chmod u+x *.sh 
 ```
-Para darle permiso de ejecución a todos los `.sh`. Borramos los retornos de carro utilizando alguna de las dos formas sugeridas y finalmente corremos alguno de los clientes con:
+Para darle permiso de ejecución a todos los `.sh`. Borramos los retornos de carro utilizando alguna de las dos formas sugeridas en la sección de `server` y finalmente corremos alguno de los clientes con:
 ```shell 
 ./<client>.sh <args> 
 ```
