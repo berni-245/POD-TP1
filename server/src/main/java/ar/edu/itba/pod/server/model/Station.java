@@ -47,12 +47,12 @@ public class Station {
         if (abandonedTrains.contains(train))
             throw new TrainAlreadyLeftException();
         if (waitingTrains.contains(train))
-            return getWaitingTrain(trainId, trainSize, passengers, doubleTraction);
+            return getAndCheckWaitingTrain(trainId, trainSize, passengers, doubleTraction);
         waitingTrains.add(train);
         return train;
     }
 
-    public synchronized Train getWaitingTrain(String id, Size trainSize, int passengers, boolean doubleTraction) {
+    public synchronized Train getAndCheckWaitingTrain(String id, Size trainSize, int passengers, boolean doubleTraction) {
         Train train = findWaitingTrainByIdOrThrow(id);
 
         if (!train.getTrainSize().equals(trainSize) || train.isDoubleTraction() != doubleTraction || train.getPassengers() != passengers)
@@ -83,32 +83,34 @@ public class Station {
             }
         }
 
-        for (Size size : Size.valuesFromSize(train.getTrainSize())) {
-            for (Platform platform : platforms.get(size).values()) {
-                synchronized (platform) {
-                    if (platform.getPlatformState().equals(PlatformState.IDLE)) {
-                        train.associatePlatform(platform);
-                        return trainsAhead;
+        synchronized (train) {
+            for (Size size : Size.valuesFromSize(train.getTrainSize())) {
+                for (Platform platform : platforms.get(size).values()) {
+                    synchronized (platform) {
+                        if (platform.getPlatformState().equals(PlatformState.IDLE)) {
+                            train.associatePlatform(platform);
+                            return trainsAhead;
+                        }
                     }
                 }
             }
-        }
 
-        if (train.canSplitIntoTwo()) {
-            Platform firstPlatform = null;
-            Size size = Size.fromOrdinal(train.getTrainSize().ordinal() - 1);
-            for (Platform platform : platforms.get(size).values()) {
-                synchronized (platform) {
-                    if (!platform.getPlatformState().equals(PlatformState.IDLE)) {
-                        continue;
-                    }
-                    if (firstPlatform == null)
-                        firstPlatform = platform;
+            if (train.canSplitIntoTwo()) {
+                Platform firstPlatform = null;
+                Size size = Size.fromOrdinal(train.getTrainSize().ordinal() - 1);
+                for (Platform platform : platforms.get(size).values()) {
+                    synchronized (platform) {
+                        if (!platform.getPlatformState().equals(PlatformState.IDLE)) {
+                            continue;
+                        }
+                        if (firstPlatform == null)
+                            firstPlatform = platform;
 
-                    else {
-                        synchronized (firstPlatform) {
-                            train.associateTwoPlatforms(firstPlatform, platform);
-                            return trainsAhead;
+                        else {
+                            synchronized (firstPlatform) {
+                                train.associateTwoPlatforms(firstPlatform, platform);
+                                return trainsAhead;
+                            }
                         }
                     }
                 }

@@ -40,6 +40,7 @@ public class GlobalExceptionHandlerInterceptor implements ServerInterceptor {
         private final Map<Class<? extends Throwable>, Code> errorCodesByException = Map.of(
                 IllegalPlatformStateException.class, Code.FAILED_PRECONDITION,
                 PlatformNotFoundException.class, Code.NOT_FOUND,
+                TrainNotFoundException.class, Code.NOT_FOUND,
                 IllegalTrainStateException.class, Code.FAILED_PRECONDITION,
                 TrainAlreadyLeftException.class, Code.ALREADY_EXISTS,
                 TrainCannotParkException.class, Code.FAILED_PRECONDITION,

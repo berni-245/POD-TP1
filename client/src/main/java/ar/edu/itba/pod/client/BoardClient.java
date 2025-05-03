@@ -100,7 +100,7 @@ public class BoardClient {
             }
 
         } catch (StatusRuntimeException e) {
-            logger.error("RPC failed: {}", e.getStatus(), e);
+            logger.error("RPC failed: {} - {}", e.getStatus().getCode(), e.getStatus().getDescription());
         } finally {
             channel.shutdown().awaitTermination(TIMEOUT, TimeUnit.SECONDS);
         }

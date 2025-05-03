@@ -75,7 +75,7 @@ public class ReportClient {
                 }
             }
         } catch (StatusRuntimeException e) {
-            logger.error("RPC failed: {}", e.getStatus(), e);
+            logger.error("RPC failed: {} - {}", e.getStatus().getCode(), e.getStatus().getDescription());
         } finally {
             channel.shutdown().awaitTermination(TIMEOUT, TimeUnit.SECONDS); // TODO change to shutdown now
         }

@@ -36,18 +36,18 @@ public class TrainClient {
 
             switch (action) {
                 case "request" -> {
-                    RequestPlatformResponse platformReply;
-                    Global.Size protoSize = parseSize(size);
-                    Global.Train protoTrain = Global.Train.newBuilder()
+                    Global.Train.Builder protoTrainBuilder = Global.Train.newBuilder()
                             .setId(trainId)
-                            .setTrainSize(protoSize)
-                            .setOccupancyNumber(Integer.parseInt(occupancy))
-                            .setHasDoubleTraction(traction != null && traction.equals("double"))
-                            .build();
-                    platformReply = stub.requestPlatform(TrainValue.newBuilder().setTrain(protoTrain).build());
+                            .setHasDoubleTraction(traction != null && traction.equals("double"));
+                    if (size != null && occupancy != null) {
+                        protoTrainBuilder.setTrainSize(parseSize(size));
+                        protoTrainBuilder.setOccupancyNumber(Integer.parseInt(occupancy));
+                    }
+                    Global.Train protoTrain = protoTrainBuilder.build();
+                    RequestPlatformResponse platformReply = stub.requestPlatform(TrainValue.newBuilder().setTrain(protoTrain).build());
 
                     if (platformReply.getTrain().getTrainState().equals(Global.TrainState.TRAIN_STATE_WAITING)) {
-                        System.out.printf("%s is waiting for platform with %d trains ahead\n",
+                        System.out.printf("%s is waiting for a platform with %d trains ahead\n",
                                 ClientUtils.trainWithOccupancyToString(platformReply.getTrain()),
                                 platformReply.getTrainsAhead()
                         );
@@ -100,7 +100,7 @@ public class TrainClient {
                 }
             }
         } catch (StatusRuntimeException e) {
-            logger.error("RPC failed: {}", e.getStatus(), e);
+            logger.error("RPC failed: {} - {}", e.getStatus().getCode(), e.getStatus().getDescription());
         } finally {
             channel.shutdown().awaitTermination(TIMEOUT, TimeUnit.SECONDS);
         }
