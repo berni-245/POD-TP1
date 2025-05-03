@@ -35,7 +35,7 @@ public class Platform implements Comparable<Platform> {
         if (!platformState.equals(PlatformState.BUSY))
             throw new IllegalPlatformStateException("The platform is not busy with a train");
         if (!train.equals(this.train))
-            throw new TrainNotFoundException("This platform does not contain the train that is trying to depart");
+            throw new TrainNotFoundException("This platform does not contain the train that you are trying to depart");
 
         this.train = null;
         platformState = PlatformState.IDLE;

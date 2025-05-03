@@ -43,6 +43,7 @@ public class GlobalExceptionHandlerInterceptor implements ServerInterceptor {
                 TrainNotFoundException.class, Code.NOT_FOUND,
                 IllegalTrainStateException.class, Code.FAILED_PRECONDITION,
                 TrainAlreadyLeftException.class, Code.ALREADY_EXISTS,
+                TrainAlreadyInStationException.class, Code.ALREADY_EXISTS,
                 TrainCannotParkException.class, Code.FAILED_PRECONDITION,
                 TrainConflictException.class, Code.ALREADY_EXISTS,
                 Exception.class, Code.INTERNAL

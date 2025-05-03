@@ -65,8 +65,14 @@ public class ReportClient {
                     Files.write(path, report.getBytes());
                 }
                 case "left" -> {
+                    Int32Value int32Value;
+                    if(platform == null)
+                        int32Value = Int32Value.getDefaultInstance();
+                    else
+                        int32Value = Int32Value.newBuilder().setValue(Integer.parseInt(platform)).build();
+
                     List<Global.TrainAndPlatformValue> trains = stub.getAbandonedTrains(
-                            Int32Value.newBuilder().setValue(Integer.parseInt(platform)).build()
+                            int32Value
                     ).getTrainAndPlatformListList();
                     if (trains.isEmpty())
                         return;

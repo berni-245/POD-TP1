@@ -11,6 +11,7 @@ public class Station {
     private final Map<Size, SortedMap<Integer, Platform>> platforms = new EnumMap<>(Size.class);
     private final ConcurrentLinkedQueue<Train> waitingTrains = new ConcurrentLinkedQueue<>();
     private final List<Train> abandonedTrains = new CopyOnWriteArrayList<>();
+    private final ConcurrentSkipListSet<String> trainsOnStations = new ConcurrentSkipListSet<>();
     private final ConcurrentMap<Integer, List<Train>> abandonedTrainsByPlatform = new ConcurrentHashMap<>();
     private final List<Consumer<BoardView>> boardObservers = new CopyOnWriteArrayList<>();
 
@@ -47,6 +48,8 @@ public class Station {
         Train train = new Train(trainId, trainSize, doubleTraction, passengers);
         if (abandonedTrains.contains(train))
             throw new TrainAlreadyLeftException();
+        if (trainsOnStations.contains(trainId))
+            throw new TrainAlreadyInStationException();
         if (waitingTrains.contains(train))
             return getAndCheckWaitingTrain(trainId, trainSize, passengers, doubleTraction);
         waitingTrains.add(train);
@@ -130,6 +133,7 @@ public class Station {
             if (isFullyParked) {
                 passengers = train.disembarkAllPassengers();
                 waitingTrains.poll();
+                trainsOnStations.add(train.getId());
             }
         }
 
@@ -142,13 +146,14 @@ public class Station {
         Platform platform = getPlatform(platformId);
         Optional<Train> trainOptional = platform.getTrain();
         if (trainOptional.isEmpty() || !trainOptional.get().getId().equals(trainId))
-            throw new TrainNotFoundException();
+            throw new TrainNotFoundException("This platform does not contain the train that you are trying to depart");
 
         Train train = trainOptional.get();
         // if two threads attempt to run the departTrain, only the first one will pass because of the platformState
         platform.departTrain(train);
         train.boardAndLeavePlatform(platform, passengers);
 
+        trainsOnStations.remove(train.getId());
         abandonedTrains.add(train);
         abandonedTrainsByPlatform.computeIfAbsent(platformId, p -> new CopyOnWriteArrayList<>())
                         .add(train);

@@ -95,7 +95,8 @@ public class Train {
         }
     }
     private synchronized void boardPassengers(int passengers) {
-        if (!trainState.equals(TrainState.IN_PLATFORM) && !trainState.equals(TrainState.IN_PLATFORM_DIVIDED))
+        List<TrainState> admittedStates = List.of(TrainState.IN_PLATFORM, TrainState.IN_PLATFORM_DIVIDED, TrainState.READY_TO_LEAVE);
+        if (!admittedStates.contains(trainState))
             throw new IllegalTrainStateException("Cannot board passengers outside of platform");
         this.passengers += passengers;
     }
@@ -104,12 +105,12 @@ public class Train {
 
     private synchronized void leavePlatform() {
         readyStateToLeavePlatform();
-        platform = null;
+//        platform = null;
     }
 
     private synchronized void leaveSecondPlatform() {
         readyStateToLeavePlatform();
-        this.secondPlatform = null;
+//        this.secondPlatform = null;
     }
 
     private synchronized void readyStateToLeavePlatform() {
