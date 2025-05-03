@@ -122,7 +122,7 @@ public class BoardClient {
                 status = "%s%s (%s)".formatted(trainIcon, platform.getTrain().getId(), platform.getTrain().getTrainSize());
             }
 
-            System.out.printf("%d | %s | %s%s%n", platform.getId(), platform.getPlatformSize(), status,
+            System.out.printf("%d | %s | %s %s%n", platform.getId(), platform.getPlatformSize(), status,
                     platformStatus.getAnnouncement().isEmpty() ? "" : "\uD83D\uDCE3%s".formatted(platformStatus.getAnnouncement()));
         }
     }

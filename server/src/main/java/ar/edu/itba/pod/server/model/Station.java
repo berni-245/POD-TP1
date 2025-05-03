@@ -23,6 +23,7 @@ public class Station {
     public Platform addPlatform(Size platformSize) {
         Platform platform = new Platform(platformSize);
         platforms.get(platformSize).put(platform.getId(), platform);
+        notifyBoardObservers();
         return platform;
     }
 

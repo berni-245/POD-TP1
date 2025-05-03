@@ -79,7 +79,9 @@ public class PlatformClient {
     }
 
     private static Global.Size parseSize(String size) {
-        return switch (size) {
+        if (size == null)
+            return Global.Size.SIZE_UNSPECIFIED;
+        return switch (size.toUpperCase()) {
             case "S" -> Global.Size.SIZE_SMALL;
             case "M" -> Global.Size.SIZE_MEDIUM;
             case "L" -> Global.Size.SIZE_LARGE;
