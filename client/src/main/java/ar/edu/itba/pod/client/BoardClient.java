@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Scanner;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class BoardClient {
     private static final int TIMEOUT = 10;
@@ -43,6 +44,7 @@ public class BoardClient {
                 }
                 case "live" -> {
                     CountDownLatch finishLatch = new CountDownLatch(1);
+                    AtomicBoolean isLive = new AtomicBoolean(true);
 
                     StreamObserver<BoardSnapshot> responseObserver = new StreamObserver<>() {
                         @Override
@@ -54,47 +56,25 @@ public class BoardClient {
 
                         @Override
                         public void onError(Throwable throwable) {
-                            logger.error("Live stream error: {}", throwable.getMessage(), throwable);
+                            System.err.printf("Live stream error: %s\n", throwable.getMessage());
+                            isLive.set(false);
                             finishLatch.countDown();
                         }
 
                         @Override
                         public void onCompleted() {
                             logger.info("Live stream completed.");
+                            isLive.set(false);
                             finishLatch.countDown();
                         }
                     };
 
                     StreamObserver<AnnouncementRequest> requestObserver = asyncStub.liveBoard(responseObserver);
 
-                    new Thread(() -> {
-                        Scanner scanner = new Scanner(System.in);
-
-                        while (true) {
-                            if (!scanner.hasNextLine()) break;
-                            String input = scanner.nextLine().trim();
-                            if (input.equalsIgnoreCase("exit")) break;
-
-                            String[] parts = input.split(" ", 2);
-                            if (parts.length != 2) {
-                                System.out.println("Invalid input: <number> <message>");
-                                continue;
-                            }
-                            int platformId = Integer.parseInt(parts[0]);
-                            String message = parts[1];
-
-                            AnnouncementRequest request = AnnouncementRequest.newBuilder()
-                                    .setPlatformId(platformId)
-                                    .setMessage(message)
-                                    .build();
-
-                            requestObserver.onNext(request);
-                        }
-                        requestObserver.onCompleted();
-
-                    }).start();
+                    Thread thread = getThread(isLive, requestObserver);
 
                     finishLatch.await();
+                    thread.interrupt();
                 }
                 default -> logger.error("Invalid action (Board Client)");
             }
@@ -105,6 +85,51 @@ public class BoardClient {
             channel.shutdown().awaitTermination(TIMEOUT, TimeUnit.SECONDS);
         }
     }
+
+    private static Thread getThread(AtomicBoolean isLive, StreamObserver<AnnouncementRequest> requestObserver) {
+        Thread thread = new Thread(() -> {
+            Scanner scanner = new Scanner(System.in);
+
+            while (true) {
+                if (!isLive.get()) break; // <-- Check live flag on each loop
+
+                if (!scanner.hasNextLine()) {
+                    try {
+                        Thread.sleep(100); // Avoid busy wait
+                    } catch (InterruptedException e) {
+                        break; // Exit on interrupt
+                    }
+                    continue;
+                }
+
+                String input = scanner.nextLine().trim();
+                if (input.equalsIgnoreCase("exit")) break;
+
+                String[] parts = input.split(" ", 2);
+                if (parts.length != 2) {
+                    System.out.println("Invalid input: <number> <message>");
+                    continue;
+                }
+
+                int platformId = Integer.parseInt(parts[0]);
+                String message = parts[1];
+
+                AnnouncementRequest request = AnnouncementRequest.newBuilder()
+                        .setPlatformId(platformId)
+                        .setMessage(message)
+                        .build();
+
+                requestObserver.onNext(request);
+            }
+
+            requestObserver.onCompleted();
+        });
+
+        thread.setDaemon(true); // Optional: kill thread when JVM exits
+        thread.start();
+        return thread;
+    }
+
 
     private static void printSnapshot(BoardSnapshot snapshot) {
         System.out.println("Platform | Size | Status");
