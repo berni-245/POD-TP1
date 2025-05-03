@@ -130,9 +130,8 @@ public class BoardClient {
         return thread;
     }
 
-
     private static void printSnapshot(BoardSnapshot snapshot) {
-        System.out.println("Platform | Size | Status");
+        System.out.printf("%-8s | %-5s | %s%n", "Platform", "Size", "Status");
         String status;
         Global.Platform platform;
 
@@ -144,11 +143,11 @@ public class BoardClient {
                 status = "CLOSED";
             } else {
                 String trainIcon = platform.getTrain().getTrainSize() == Global.Size.SIZE_MEDIUM ? "\uD83D\uDE85\uD83D\uDE85" : "\uD83D\uDE85";
-                status = "%s%s (%s)".formatted(trainIcon, platform.getTrain().getId(), platform.getTrain().getTrainSize());
+                status = "%s%s (%s)".formatted(trainIcon, platform.getTrain().getId(), ClientUtils.sizeToString(platform.getTrain().getTrainSize()));
             }
 
-            System.out.printf("%d | %s | %s %s%n", platform.getId(), platform.getPlatformSize(), status,
-                    platformStatus.getAnnouncement().isEmpty() ? "" : "\uD83D\uDCE3%s".formatted(platformStatus.getAnnouncement()));
+            System.out.printf("%-8d | %-5s| %s %s%n", platform.getId(), ClientUtils.sizeToString(platform.getPlatformSize()), status,
+                    platformStatus.getAnnouncement().isEmpty() ? "" : "\uD83D\uDCE3 %s".formatted(platformStatus.getAnnouncement()));
         }
     }
 }
