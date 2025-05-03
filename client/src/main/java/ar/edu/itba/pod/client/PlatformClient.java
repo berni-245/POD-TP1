@@ -13,18 +13,15 @@ import java.util.concurrent.TimeUnit;
 
 public class PlatformClient {
     private static final int TIMEOUT = 10;
-    private static final Logger logger = LoggerFactory.getLogger(PlatformClient.class);
 
     public static void main(String[] args) throws InterruptedException {
-        logger.info("Platform Client Starting ...");
-
         final String serverAddress = System.getProperty("serverAddress");
         final String action = System.getProperty("action");
         final String size = System.getProperty("size");
         final String platform = System.getProperty("platform");
 
         if (serverAddress == null || action == null) {
-            logger.error("Missing argument (Platform Client)");
+            System.err.println("Missing argument (Platform Client)");
             return;
         }
         final ManagedChannel channel = ManagedChannelBuilder.forTarget(serverAddress).usePlaintext().build();
@@ -37,7 +34,7 @@ public class PlatformClient {
                 case "add" -> {
                     Global.Size protoSize = parseSize(size);
                     if (protoSize == Global.Size.SIZE_UNSPECIFIED) {
-                        logger.error("Invalid size");
+                        System.err.println("Invalid size");
                         return;
                     }
                     platformReply = stub.addPlatform(PlatformSize.newBuilder().setPlatformSize(protoSize).build());
@@ -45,7 +42,7 @@ public class PlatformClient {
                 }
                 case "status" -> {
                     if (platform == null) {
-                        logger.error("Missing platform");
+                        System.err.println("Missing platform");
                         return;
                     }
                     platformReply = stub.checkState(com.google.protobuf.Int32Value.newBuilder().setValue(Integer.parseInt(platform)).build());
@@ -65,7 +62,7 @@ public class PlatformClient {
                 }
                 case "toggle" -> {
                     if (platform == null) {
-                        logger.error("Missing platform");
+                        System.err.println("Missing platform");
                         return;
                     }
                     platformReply = stub.toggleState(com.google.protobuf.Int32Value.newBuilder().setValue(Integer.parseInt(platform)).build());
@@ -75,13 +72,13 @@ public class PlatformClient {
                     );
                 }
                 default -> {
-                    logger.error("Invalid action (Platform Client)");
+                    System.err.println("Invalid action (Platform Client)");
                     return;
                 }
             }
         }
         catch (StatusRuntimeException e) {
-            logger.error("RPC failed: {} - {}", e.getStatus().getCode(), e.getStatus().getDescription());
+            System.err.printf("RPC failed: {%s} - {%s}%n", e.getStatus().getCode(), e.getStatus().getDescription());
         } finally {
             channel.shutdown().awaitTermination(TIMEOUT, TimeUnit.SECONDS);
         }

@@ -19,16 +19,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class BoardClient {
     private static final int TIMEOUT = 10;
-    private static final Logger logger = LoggerFactory.getLogger(BoardClient.class);
 
     public static void main(String[] args) throws InterruptedException {
-        logger.info("Board Client Starting ...");
-
         final String serverAddress = System.getProperty("serverAddress");
         final String action = System.getProperty("action");
 
         if (serverAddress == null || action == null) {
-            logger.error("Missing argument (Board Client)");
+            System.err.println("Missing argument (Board Client)");
             return;
         }
         final ManagedChannel channel = ManagedChannelBuilder.forTarget(serverAddress).usePlaintext().build();
@@ -51,6 +48,7 @@ public class BoardClient {
                         public void onNext(BoardSnapshot snapshot) {
                             System.out.println("### LIVE BOARD ###");
                             printSnapshot(snapshot);
+                            System.out.println("###");
                             System.out.println("\uD83D\uDE85 Number and Announcement: ");
                         }
 
@@ -63,7 +61,6 @@ public class BoardClient {
 
                         @Override
                         public void onCompleted() {
-                            logger.info("Live stream completed.");
                             isLive.set(false);
                             finishLatch.countDown();
                         }
@@ -76,11 +73,11 @@ public class BoardClient {
                     finishLatch.await();
                     thread.interrupt();
                 }
-                default -> logger.error("Invalid action (Board Client)");
+                default -> System.err.println("Invalid action (Board Client)");
             }
 
         } catch (StatusRuntimeException e) {
-            logger.error("RPC failed: {} - {}", e.getStatus().getCode(), e.getStatus().getDescription());
+            System.err.printf("RPC failed: {%s} - {%s}%n", e.getStatus().getCode(), e.getStatus().getDescription());
         } finally {
             channel.shutdown().awaitTermination(TIMEOUT, TimeUnit.SECONDS);
         }

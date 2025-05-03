@@ -10,17 +10,13 @@ import org.slf4j.LoggerFactory;
 
 public class NotificationClient {
 
-    private static final Logger logger = LoggerFactory.getLogger(NotificationClient.class);
-
     public static void main(String[] args) {
-        logger.info("Notification Client Starting ...");
-
         final String serverAddress = System.getProperty("serverAddress");
         final String action = System.getProperty("action");
         final String platform = System.getProperty("platform");
 
         if (serverAddress == null || action == null || platform == null) {
-            logger.error("Missing required parameters (Notification Client)");
+            System.err.println("Missing required parameters (Notification Client)");
             return;
         }
 
@@ -28,15 +24,13 @@ public class NotificationClient {
         try {
             platformId = Integer.parseInt(platform);
         } catch (NumberFormatException e) {
-            logger.error("Invalid platform ID: must be an integer");
+            System.err.println("Invalid platform ID: must be an integer");
             return;
         }
 
         final ManagedChannel channel = ManagedChannelBuilder.forTarget(serverAddress).usePlaintext().build();
         NotificationServiceGrpc.NotificationServiceBlockingStub blockingStub = NotificationServiceGrpc.newBlockingStub(channel);
         NotificationServiceGrpc.NotificationServiceStub asyncStub = NotificationServiceGrpc.newStub(channel);
-
-        logger.info("serverAddress: {}, action: {}, platform: {}", serverAddress, action, platform);
 
         try {
             switch (action.toLowerCase()) {
@@ -47,12 +41,12 @@ public class NotificationClient {
                     deregisterPlatform(blockingStub, platformId);
                     break;
                 default:
-                    logger.error("Unknown action: {}", action);
+                    System.err.printf("Unknown action: {%s}%n", action);
             }
         } catch (StatusRuntimeException e) {
-            logger.error("gRPC Error: {}", e.getStatus(), e);
+            System.err.printf("gRPC Error: {%s} {%s}%n", e.getStatus(), e);
         } catch (Exception e) {
-            logger.error("Unrecognized error. {}", e.getMessage(), e);
+            System.err.printf("Unrecognized error. {%s} {%s}%n", e.getMessage(), e);
         } finally {
             channel.shutdownNow();
         }
@@ -70,11 +64,9 @@ public class NotificationClient {
         Notif.PlatformRegisterResponse registerResponse = blockingStub.register(registerRequest);
 
         if (!registerResponse.getSuccess()) {
-            logger.error("Registration failed: {}", registerResponse.getMessage());
+            System.err.printf("Registration failed: {%s}%n", registerResponse.getMessage());
             return;
         }
-
-        logger.info("Platform registered. Now listening for messages...");
 
         // Step 2: Start listening
         Notif.PlatformListenRequest listenRequest = Notif.PlatformListenRequest.newBuilder()
@@ -84,17 +76,17 @@ public class NotificationClient {
         asyncStub.listen(listenRequest, new io.grpc.stub.StreamObserver<>() {
             @Override
             public void onNext(Notif.PlatformServerMessage msg) {
-                logger.info("Received notification [type={}]: {}", msg.getNotifType(), msg);
+                System.out.printf("Received notification [type={%s}]: {%s}%n", msg.getNotifType(), msg);
             }
 
             @Override
             public void onError(Throwable t) {
-                logger.error("Stream error: {}", t.getMessage());
+                System.err.printf("Stream error: {%s}%n", t.getMessage());
             }
 
             @Override
             public void onCompleted() {
-                logger.info("Stream closed by server.");
+                return;
             }
         });
 
@@ -112,9 +104,9 @@ public class NotificationClient {
         Notif.PlatformDeregisterResponse deregisterResponse = blockingStub.deregister(deregisterRequest);
 
         if (deregisterResponse.getSuccess()) {
-            logger.info("Deregistered successfully: {}", deregisterResponse.getMessage());
+            // logger.info("Deregistered successfully: {}", deregisterResponse.getMessage());
         } else {
-            logger.error("Deregistration failed: {}", deregisterResponse.getMessage());
+            System.err.printf("Deregistration failed: {%s}%n", deregisterResponse.getMessage());
         }
         //asdasdasdasd
     }

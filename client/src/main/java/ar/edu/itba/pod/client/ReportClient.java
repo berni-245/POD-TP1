@@ -19,7 +19,6 @@ import java.util.function.Function;
 
 public class ReportClient {
 
-    private static final Logger logger = LoggerFactory.getLogger(ReportClient.class);
     private static final int TIMEOUT = 30;
 
     private static final Function<Global.Train, String> WAITING_TRAIN_TO_STRING =
@@ -35,16 +34,13 @@ public class ReportClient {
             );
 
     public static void main(String[] args) throws InterruptedException, IOException {
-
-        logger.info("Report Client Starting ...");
-
         final String serverAddress = System.getProperty("serverAddress");
         final String action = System.getProperty("action");
         final String outPath = System.getProperty("outPath");
         final String platform = System.getProperty("platform");
 
         if (serverAddress == null || action == null) {
-            logger.error("Missing argument (Report Client)");
+            System.err.println("Missing argument (Report Client)");
             return;
         }
         final ManagedChannel channel = ManagedChannelBuilder.forTarget(serverAddress).usePlaintext().build();
@@ -52,7 +48,7 @@ public class ReportClient {
         try {
             ReportGrpc.ReportBlockingStub stub = ReportGrpc.newBlockingStub(channel);
             if (outPath == null) {
-                logger.error("Missing argument outpath");
+                System.err.println("Missing argument outpath");
                 return;
             }
             final Path path = Path.of(outPath);
@@ -81,7 +77,7 @@ public class ReportClient {
                 }
             }
         } catch (StatusRuntimeException e) {
-            logger.error("RPC failed: {} - {}", e.getStatus().getCode(), e.getStatus().getDescription());
+            System.err.printf("RPC failed: {%s} - {%s}%n", e.getStatus().getCode(), e.getStatus().getDescription());
         } finally {
             channel.shutdown().awaitTermination(TIMEOUT, TimeUnit.SECONDS); // TODO change to shutdown now
         }

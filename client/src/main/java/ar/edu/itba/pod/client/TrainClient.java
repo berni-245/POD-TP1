@@ -12,10 +12,8 @@ import java.util.concurrent.TimeUnit;
 public class TrainClient {
 
     private static final int TIMEOUT = 10;
-    private static final Logger logger = LoggerFactory.getLogger(TrainClient.class);
 
     public static void main(String[] args) throws InterruptedException {
-        logger.info("Train Client Starting ...");
 
         final String serverAddress = System.getProperty("serverAddress");
         final String action = System.getProperty("action");
@@ -26,7 +24,7 @@ public class TrainClient {
         final String traction = System.getProperty("traction");
 
         if (serverAddress == null || action == null) {
-            logger.error("Missing argument (Train Client)");
+            System.err.println("Missing argument (Train Client)");
             return;
         }
         final ManagedChannel channel = ManagedChannelBuilder.forTarget(serverAddress).usePlaintext().build();
@@ -95,12 +93,12 @@ public class TrainClient {
                     );
                 }
                 default -> {
-                    logger.error("Invalid action (Platform Client)");
+                    System.err.println("Invalid action (Platform Client)");
                     return;
                 }
             }
         } catch (StatusRuntimeException e) {
-            logger.error("RPC failed: {} - {}", e.getStatus().getCode(), e.getStatus().getDescription());
+            System.err.printf("RPC failed: {%s} - {%s}%n", e.getStatus().getCode(), e.getStatus().getDescription());
         } finally {
             channel.shutdown().awaitTermination(TIMEOUT, TimeUnit.SECONDS);
         }

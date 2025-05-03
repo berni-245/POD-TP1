@@ -7,7 +7,6 @@ import io.grpc.stub.StreamObserver;
 import ar.edu.itba.pod.server.PlatformSize;
 import ar.edu.itba.pod.server.PlatformAdministratorGrpc;
 
-// TODO hacer un script que comente todo en el paquete servant menos ServantFactory
 public class PlatformAdministratorServant extends PlatformAdministratorGrpc.PlatformAdministratorImplBase {
     private final Station station;
 
