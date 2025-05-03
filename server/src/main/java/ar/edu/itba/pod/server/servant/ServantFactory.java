@@ -9,7 +9,7 @@ public abstract class ServantFactory {
     public static List<BindableService> getServants() {
         Station station = new Station();
         return List.of(
-                new PlatformAdministratorServant(station), new TrainAdministratorServant(station), new BoardAdministratorServant(station), new ReportServant(station)
+                new PlatformAdministratorServant(station), new TrainAdministratorServant(station), new BoardAdministratorServant(station), new ReportServant(station), new NotificationAdministratorServant(station)
         );
     }
 }

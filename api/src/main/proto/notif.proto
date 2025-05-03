@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+import "global.proto";
+import "google/protobuf/empty.proto";
+
+package service;
+
+option java_package = "ar.edu.itba.pod.server";
+
+service NotificationService {
+  rpc register (PlatformRegisterRequest) returns (PlatformRegisterResponse);
+  rpc deregister (PlatformDeregisterRequest) returns (PlatformDeregisterResponse);
+  rpc Listen(PlatformListenRequest) returns (stream PlatformServerMessage);
+}
+
+message PlatformListenRequest {
+  int32 platform_id = 1;
+}
+
+message PlatformServerMessage {
+  int32 notifType = 1;
+  int32 platformId = 2;
+  Size platformSize = 3;
+
+  // Optional fields — these may or may not be present
+  int32 details = 4;
+  int32 details2 = 5;
+  string details3 = 6;
+  Size trainSize = 7;
+}
+
+message PlatformRegisterRequest {
+  int32 platformId = 1;
+}
+
+message PlatformRegisterResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message PlatformDeregisterRequest {
+  int32 platformId = 1;
+}
+
+message PlatformDeregisterResponse {
+  bool success = 1;
+  string message = 2;
+}
