@@ -143,6 +143,7 @@ public class Station {
             throw new TrainNotFoundException();
 
         Train train = trainOptional.get();
+        // if two threads attempt to run the departTrain, only the first one will pass because of the platformState
         platform.departTrain(train);
         train.boardAndLeavePlatform(platform, passengers);
 
@@ -152,14 +153,6 @@ public class Station {
 
         notifyBoardObservers();
         return train;
-    }
-
-    public Map<Size, SortedMap<Integer, Platform>> getPlatforms() {
-        Map<Size, SortedMap<Integer, Platform>> immutablePlatforms = new EnumMap<>(Size.class);
-        for (Map.Entry<Size, SortedMap<Integer, Platform>> entry : platforms.entrySet()) {
-            immutablePlatforms.put(entry.getKey(), Collections.unmodifiableSortedMap(entry.getValue()));
-        }
-        return Collections.unmodifiableMap(immutablePlatforms);
     }
 
     public void setAnnouncement(int platformId, String message) {
@@ -194,11 +187,9 @@ public class Station {
         boardObservers.remove(observer);
     }
 
+    // synchronized so the queue doesn't change
     public synchronized List<Train> getCurrentWaitingTrains () {
-        List<Train> toReturn = new ArrayList<>();
-        for (Train train : waitingTrains)
-            toReturn.add(new Train(train.getId(), train.getTrainSize(), train.isDoubleTraction(), train.getPassengers()));
-        return toReturn;
+        return new ArrayList<>(waitingTrains);
     }
 
     public List<Train> getAbandonedTrains() {

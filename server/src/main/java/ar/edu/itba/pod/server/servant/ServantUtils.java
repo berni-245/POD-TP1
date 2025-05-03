@@ -8,23 +8,29 @@ import ar.edu.itba.pod.server.model.Train;
 import java.util.List;
 import java.util.Optional;
 
+@SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
 public class ServantUtils {
     static Global.Train parseTrainModelToGrpc(Train train) {
-        return Global.Train.newBuilder()
-                .setId(train.getId())
-                .setTrainSizeValue(train.getTrainSize().ordinal() + 1)
-                .setOccupancyNumber(train.getPassengers())
-                .setHasDoubleTraction(train.isDoubleTraction())
-                .setTrainStateValue(train.getTrainState().ordinal() + 1)
-                .build();
+        synchronized (train) {
+            return Global.Train.newBuilder()
+                    .setId(train.getId())
+                    .setTrainSizeValue(train.getTrainSize().ordinal() + 1)
+                    .setOccupancyNumber(train.getPassengers())
+                    .setHasDoubleTraction(train.isDoubleTraction())
+                    .setTrainStateValue(train.getTrainState().ordinal() + 1)
+                    .build();
+        }
     }
 
     static Global.Platform parsePlatformModelToGrpc(Platform platform) {
         Global.Platform.Builder builder = Global.Platform.newBuilder()
                 .setId(platform.getId())
-                .setPlatformSizeValue(platform.getPlatformSize().ordinal() + 1)
-                .setStateValue(platform.getPlatformState().ordinal() + 1);
-        Optional<Train> train = platform.getTrain();
+                .setPlatformSizeValue(platform.getPlatformSize().ordinal() + 1);
+        Optional<Train> train;
+        synchronized (platform) {
+            builder.setStateValue(platform.getPlatformState().ordinal() + 1);
+            train = platform.getTrain();
+        }
         train.ifPresent(value -> builder.setTrain(parseTrainModelToGrpc(value)));
         return builder.build();
     }
@@ -32,11 +38,13 @@ public class ServantUtils {
     static RequestPlatformResponse parseToRequestPlatformResponse(Train train, int trainsAhead) {
         RequestPlatformResponse.Builder builder = RequestPlatformResponse.newBuilder();
         if (train != null) {
-            builder.setTrain(parseTrainModelToGrpc(train));
-            if (train.getPlatform() != null)
-                builder.setPlatform(parsePlatformModelToGrpc(train.getPlatform()));
-            if (train.getSecondPlatform() != null)
-                builder.setSecondPlatform(parsePlatformModelToGrpc(train.getSecondPlatform()));
+            synchronized (train) {
+                builder.setTrain(parseTrainModelToGrpc(train));
+                if (train.getPlatform() != null)
+                    builder.setPlatform(parsePlatformModelToGrpc(train.getPlatform()));
+                if (train.getSecondPlatform() != null)
+                    builder.setSecondPlatform(parsePlatformModelToGrpc(train.getSecondPlatform()));
+            }
             builder.setTrainsAhead(trainsAhead);
         }
         return builder.build();
@@ -45,12 +53,14 @@ public class ServantUtils {
     static OccupyPlatformResponse parseToOccupyPlatformResponse(Train train, int previousOccupancy) {
         OccupyPlatformResponse.Builder builder = OccupyPlatformResponse.newBuilder();
         if (train != null) {
-            builder.setTrain(parseTrainModelToGrpc(train));
-            if (train.getPlatform() != null)
-                builder.setPlatform(parsePlatformModelToGrpc(train.getPlatform()));
-            if (train.getSecondPlatform() != null)
-                builder.setSecondPlatform(parsePlatformModelToGrpc(train.getSecondPlatform()));
-            builder.setPreviousOccupancy(previousOccupancy);
+            synchronized (train) {
+                builder.setTrain(parseTrainModelToGrpc(train));
+                if (train.getPlatform() != null)
+                    builder.setPlatform(parsePlatformModelToGrpc(train.getPlatform()));
+                if (train.getSecondPlatform() != null)
+                    builder.setSecondPlatform(parsePlatformModelToGrpc(train.getSecondPlatform()));
+                builder.setPreviousOccupancy(previousOccupancy);
+            }
         }
         return builder.build();
     }
