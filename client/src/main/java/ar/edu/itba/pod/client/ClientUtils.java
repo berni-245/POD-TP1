@@ -33,6 +33,21 @@ public class ClientUtils {
         return "STATE UNDEFINED"; // Should never happen
     }
 
+    static String trainStateToString(Global.TrainState state) {
+        return switch (state) {
+            case TRAIN_STATE_WAITING -> "WAITING";
+            case TRAIN_STATE_PROCEED -> "PROCEED";
+            case TRAIN_STATE_SPLIT_AND_PROCEED -> "SPLIT AND PROCEED";
+            case TRAIN_STATE_IN_PLATFORM -> "IN PLATFORM";
+            case TRAIN_STATE_IN_PLATFORM_DIVIDED -> "IN PLATFORM (DIVIDED)";
+            case TRAIN_STATE_READY_TO_LEAVE -> "READY TO LEAVE";
+            case TRAIN_STATE_LEFT -> "LEFT";
+            case TRAIN_STATE_REJOINED_AND_LEFT -> "REJOINED AND LEFT";
+            case TRAIN_STATE_UNSPECIFIED, UNRECOGNIZED -> "UNSPECIFIED";
+            case null -> "UNKNOWN";
+        };
+    }
+
     static String trainToString(Global.Train train) {
         return "\uD83D\uDE85%s%s (%s)".formatted(
                 train.getHasDoubleTraction()?"\uD83D\uDE85":"",

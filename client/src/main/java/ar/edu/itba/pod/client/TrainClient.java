@@ -86,9 +86,9 @@ public class TrainClient {
                             .build();
                     trainAndPlatformReply = stub.leavePlatform(trainAndPlatformAndOccupancy);
 
-                    System.out.printf("%s %s %s%s", // TODO check output format here
+                    System.out.printf("%s %s %s%s",
                             ClientUtils.trainToString(trainAndPlatformReply.getTrain()),
-                            trainAndPlatformReply.getTrain().getTrainState(),
+                            ClientUtils.trainStateToString(trainAndPlatformReply.getTrain().getTrainState()).toLowerCase(),
                             ClientUtils.platformToString(trainAndPlatformReply.getPlatform()),
                             trainAndPlatformReply.getTrain().getTrainState().equals(Global.TrainState.TRAIN_STATE_READY_TO_LEAVE) ?
                                     "" : " after loading %d \uD83E\uDDCD".formatted(trainAndPlatformReply.getTrain().getOccupancyNumber())
