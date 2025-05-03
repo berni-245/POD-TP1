@@ -27,6 +27,15 @@ public class Train {
         return doubleTraction && trainSize != Size.SMALL;
     }
 
+    public synchronized void goBackToWaiting() {
+        List<TrainState> admissibleStates = List.of(TrainState.WAITING, TrainState.PROCEED, TrainState.SPLIT_AND_PROCEED);
+        if (!admissibleStates.contains(trainState))
+            throw new IllegalTrainStateException("The train is not waiting for a platform");
+        trainState = TrainState.WAITING;
+        this.platform = null;
+        this.secondPlatform = null;
+    }
+
     public synchronized void associatePlatform(Platform platform) {
         List<TrainState> admissibleStates = List.of(TrainState.WAITING, TrainState.PROCEED, TrainState.SPLIT_AND_PROCEED);
         if (!admissibleStates.contains(trainState))

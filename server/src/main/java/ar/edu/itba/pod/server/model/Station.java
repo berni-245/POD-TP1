@@ -116,6 +116,7 @@ public class Station {
                     }
                 }
             }
+            train.goBackToWaiting();
         }
         return trainsAhead;
     }
