@@ -4,8 +4,6 @@ import ar.edu.itba.pod.server.*;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.TimeUnit;
 
@@ -92,15 +90,14 @@ public class TrainClient {
                                     "" : " after loading %d \uD83E\uDDCD".formatted(trainAndPlatformReply.getTrain().getOccupancyNumber())
                     );
                 }
-                default -> {
-                    System.err.println("Invalid action (Platform Client)");
-                    return;
-                }
+                default -> System.err.println("Invalid action (Platform Client)");
+
             }
         } catch (StatusRuntimeException e) {
             System.err.printf("RPC failed: {%s} - {%s}%n", e.getStatus().getCode(), e.getStatus().getDescription());
         } finally {
             channel.shutdown().awaitTermination(TIMEOUT, TimeUnit.SECONDS);
+            channel.shutdownNow();
         }
     }
 

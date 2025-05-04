@@ -104,10 +104,10 @@ public class NotificationClient {
         Notif.PlatformDeregisterResponse deregisterResponse = blockingStub.deregister(deregisterRequest);
 
         if (deregisterResponse.getSuccess()) {
-            // logger.info("Deregistered successfully: {}", deregisterResponse.getMessage());
+
         } else {
             System.err.printf("Deregistration failed: {%s}%n", deregisterResponse.getMessage());
         }
-        //asdasdasdasd
+
     }
 }
